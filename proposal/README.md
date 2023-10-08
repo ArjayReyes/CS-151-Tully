@@ -8,7 +8,7 @@
 **Problem**: Tully Library has contracted our startup company, 5X-if-else, to create an intuitive library management system by the end of Q4 2023. The library management system must incorporate object-oriented programming concepts, Java’s Graphical User Interface (GUI) capabilities, and exception handling.
 
 **Assumptions**: 
-Limit users' ability to manipulate the database. 
+* Limit users' ability to manipulate the database. 
 * Use exceptions to handle invalid books or users having too many books.
 * Users have basic “computer sense” to navigate a simple interface (can read/understand directions, click buttons, know what a username/password is, etc).
 
