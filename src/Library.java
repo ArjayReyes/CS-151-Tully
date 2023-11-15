@@ -623,19 +623,359 @@ public class Library implements MouseListener
             }
             else if (currentScreen.equals("bookScreen"))
             {
-                // TODO: RETURN TO MAIN SCREEN
+                currentScreen = "login";
+
+                north.setPreferredSize(null);
+
+                frame.getContentPane().setLayout(new BorderLayout());
+                north.setLayout(new FlowLayout(FlowLayout.CENTER)); // FlowLayout = default layout
+                south.setLayout(new FlowLayout(FlowLayout.CENTER));
+                west.setLayout(new GridLayout(3, 1));
+                center.setLayout(new FlowLayout(FlowLayout.CENTER));
+                east.setLayout(new FlowLayout(FlowLayout.LEFT));
+                loginPanel.setLayout(new GridLayout(2, 1));
+
+                frame.add(west, BorderLayout.WEST);
+                frame.add(north, BorderLayout.NORTH);
+                frame.add(center, BorderLayout.CENTER);
+                frame.add(south, BorderLayout.SOUTH);
+                frame.add(east, BorderLayout.EAST);
+
+                accountButton.setVisible(false);
+                scrollPane.setVisible(false);
+                returnButton.setVisible(true);
+                submitButton.setVisible(true);
+                loginPanel.setVisible(true);
+
+                south.remove(returnButton);
+                south.remove(submitButton);
+
+                south.add(returnButton);
+                south.add(submitButton);
+
+                JLabel usernameText = new JLabel();
+                usernameText.setText("Username:");
+                usernameText.setFont(new Font("Arial", Font.BOLD, 40));
+                usernameText.setPreferredSize(new Dimension(225, 100));
+                usernameText.setOpaque(false);
+                usernameText.setVisible(true);
+
+                JLabel passwordText = new JLabel();
+                passwordText.setText("Password:");
+                passwordText.setFont(new Font("Arial", Font.BOLD, 40));
+                passwordText.setPreferredSize(new Dimension(225, 50));
+                passwordText.setOpaque(false);
+                passwordText.setVisible(true);
+
+                west.add(usernameText);
+                west.add(passwordText);
+
+                usernameLogin.setText("Enter your username here");
+                usernameLogin.setForeground(Color.GRAY);
+                usernameLogin.setEditable(false);
+
+                passwordLogin.setText("Enter your password here");
+                passwordLogin.setEchoChar((char) 0);
+                passwordLogin.setForeground(Color.GRAY);
+                passwordLogin.setEditable(false);
+
+                west.add(usernameText);
+                west.add(passwordText);
+                loginPanel.add(usernameLogin);
+                loginPanel.add(passwordLogin);
+                center.add(loginPanel);
+
+                north.setBorder(BorderFactory.createEmptyBorder(0, 300, 100, 0));
+                center.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
+                west.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
+                south.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
+
+                for (int i = 0; i < north.getComponentCount(); i++)
+                {
+                    JLabel temp;
+
+                    if (north.getComponent(i) instanceof JLabel)
+                    {
+                        temp = (JLabel) north.getComponent(i);
+
+                        if (temp.getText().equals("Available Books"))
+                        {
+                            north.remove(north.getComponent(i));
+
+                            // since removing something shifts "loop" to the right
+                            --i;
+                        }
+                    }
+                }
             }
             else if (currentScreen.equals("accountScreen"))
             {
-                // TODO: RETURN TO LIBRARY BOOK SELECTION SCREEN
+                currentScreen = "bookScreen";
+
+                for (int i = 0; i < north.getComponentCount(); i++)
+                {
+                    JLabel temp;
+
+                    if (north.getComponent(i) instanceof JLabel)
+                    {
+                        temp = (JLabel) north.getComponent(i);
+
+                        if (temp.getName().equals("welcomeText"))
+                        {
+                            north.remove(north.getComponent(i));
+
+                            // since removing something shifts "loop" to the right
+                            --i;
+                        }
+                    }
+                }
+
+                north.setLayout(new FlowLayout(FlowLayout.CENTER));
+                west.setLayout(null);
+                east.setLayout(null);
+                south.setLayout(null);
+                center.setLayout(null);
+
+                feePanel.setVisible(false);
+                bookInventoryButton.setVisible(false);
+                waitListListButton.setVisible(false);
+                accountPanel.setVisible(false);
+
+                north.setBorder(BorderFactory.createEmptyBorder(0, 320, 0, 0));
+                center.setBorder(null);
+                west.setBorder(null);
+                east.setBorder(null);
+                south.setBorder(null);
+
+                loginPanel.setVisible(false);
+                returnButton.setVisible(false);
+                submitButton.setVisible(false);
+                scrollPane.setVisible(true);
+
+                booksPanel.setBorder(LineBorder.createBlackLineBorder());
+                booksPanel.setVisible(true);
+
+                GridBagConstraints panelConstraints = new GridBagConstraints(); // GRIDBAG MAKES NO SENSE
+                panelConstraints.gridx = 1; // lower numbers = left side, higher numbers = right side?
+                panelConstraints.gridy = 1;
+                frame.setLayout(new GridBagLayout());
+                frame.add(scrollPane, panelConstraints);
+
+                JLabel welcomeText = new JLabel();
+                welcomeText.setText("Tully Library");
+                welcomeText.setFont(new Font("Arial", Font.BOLD, 60));
+                welcomeText.setPreferredSize(new Dimension(650, 100));
+                welcomeText.setOpaque(false);
+                welcomeText.setVisible(true);
+                north.add(welcomeText);
+
+                JLabel availableBooksText = new JLabel();
+                availableBooksText.setText("Available Books");
+                availableBooksText.setFont(new Font("Cambria", Font.BOLD, 40));
+                availableBooksText.setPreferredSize(new Dimension(625, 75));
+                availableBooksText.setOpaque(false);
+                north.add(availableBooksText);
+
+                panelConstraints.gridx = 1;
+                panelConstraints.gridy = 0;
+                frame.add(north, panelConstraints); // replaces existing north
+                north.setPreferredSize(new Dimension(650, 175)); // TODO: CHANGE NORTH SIZE WHEN GO BACK TO MAIN SCREENS
+
+                // enlarges icon
+                ImageIcon imageIcon = (ImageIcon) UIManager.getIcon("OptionPane.warningIcon"); // load the image to a imageIcon
+                Image image = imageIcon.getImage(); // transform it
+                Image newImage = image.getScaledInstance(60, 60,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+                imageIcon = new ImageIcon(newImage);  // transform it back
+
+                panelConstraints.ipadx = 0;
+
+                // TODO: ADD ACTUAL BOOKS
+                // TODO: ADD WAIT LIST WHEN PRESS BOOK IF ALREADY BORROWED
+                // probably want to get rid of this for loop at some point
+                for (int i = 0; i < 25; i++)
+                {
+                    JButton temp = new JButton();
+                    temp.setText("<html>Book " + i + "<br>Author: Bob</html>");
+                    temp.setFont(new Font("Calibri", Font.BOLD, 25));
+                    temp.setHorizontalAlignment(SwingConstants.LEFT);
+                    temp.setIcon(imageIcon);
+                    temp.setPreferredSize(new Dimension(450, 100));
+                    booksPanel.add(temp);
+                }
+
+                booksPanel.setLayout(new GridLayout(booksPanel.getComponentCount(), 1));
+
+                east.add(accountButton); // Account button panel
+                east.setLayout(new GridBagLayout());
+                accountButton.setVisible(true);
+                south.add(returnButton); // Return button panel
+                south.setLayout(new GridBagLayout());
+                returnButton.setVisible(true);
+                panelConstraints.gridx = 2;
+                panelConstraints.gridy = -1;
+                frame.add(east, panelConstraints);
+                panelConstraints.gridx = 2;
+                panelConstraints.gridy = 1;
+                panelConstraints.anchor = GridBagConstraints.SOUTH; // sticks component to the south
+                frame.add(south, panelConstraints);
+
+                returnButton.setBackground(DEFAULT_COLOR);
             }
             else if (currentScreen.equals("inventoryScreen"))
             {
-                // TODO: RETURN TO ACCOUNT SCREEN
+                currentScreen = "accountScreen";
+
+                for (int i = 0; i < north.getComponentCount(); i++)
+                {
+                    JLabel tempLabel;
+
+                    if (north.getComponent(i) instanceof JLabel)
+                    {
+                        tempLabel = (JLabel) north.getComponent(i);
+
+                        if (tempLabel.getText().equals("Borrowed Books"))
+                        {
+                            north.remove(north.getComponent(i));
+
+                            // since removing something shifts "loop" to the right
+                            --i;
+                        }
+                    }
+                }
+
+                payFeesButton.setVisible(true);
+                bookInventoryButton.setVisible(true);
+                waitListListButton.setVisible(true);
+                returnButton.setVisible(true);
+                inventoryOfBooks.setVisible(false);
+
+                // TODO: SET FRAMES VISIBLE AGAIN WHEN GO BACK
+                north.setVisible(true);
+                center.setVisible(true);
+                west.setVisible(true);
+                east.setVisible(true);
+                south.setVisible(true);
+
+                frame.getContentPane().setLayout(new BorderLayout());
+                frame.add(west, BorderLayout.WEST);
+                frame.add(north, BorderLayout.NORTH);
+                frame.add(center, BorderLayout.CENTER);
+                frame.add(south, BorderLayout.SOUTH);
+                frame.add(east, BorderLayout.EAST);
+
+                north.setPreferredSize(new Dimension(1000, 300));
+
+                // TODO: ADD USERNAME
+                JLabel welcomeUserText = new JLabel();
+                welcomeUserText.setText("Welcome, " + "USERNAME_HERE" + "!");
+                welcomeUserText.setFont(new Font("Arial", Font.BOLD, 40));
+                welcomeUserText.setPreferredSize(new Dimension(950, 75));
+                welcomeUserText.setOpaque(false);
+                welcomeUserText.setVisible(true);
+                welcomeUserText.setHorizontalTextPosition(SwingConstants.LEFT);
+                welcomeUserText.setName("welcomeText"); // ID
+
+                accountButton.setVisible(false);
+                booksPanel.setVisible(false);
+                scrollPane.setVisible(false);
+                north.setVisible(true);
+                payFeesButton.setVisible(true);
+                waitListListButton.setVisible(true);
+                bookInventoryButton.setVisible(true);
+
+                center.setBorder(BorderFactory.createEmptyBorder(0, 9, 0, 0));
+                north.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+
+                north.add(welcomeUserText);
+                feePanel.add(payFeesButton);
+                north.add(feePanel);
+                accountPanel.add(bookInventoryButton);
+                accountPanel.add(waitListListButton);
+                center.add(accountPanel);
+
+                accountPanel.setLayout(new GridLayout(2, 1));
+                feePanel.setLayout(new GridLayout(2, 1));
+                north.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+                returnButton.setBackground(DEFAULT_COLOR);
             }
             else if (currentScreen.equals("waitlistedBooksScreen"))
             {
-                // TODO: RETURN TO ACCOUNT SCREEN
+                currentScreen = "accountScreen";
+
+                for (int i = 0; i < north.getComponentCount(); i++)
+                {
+                    JLabel tempLabel;
+
+                    if (north.getComponent(i) instanceof JLabel)
+                    {
+                        tempLabel = (JLabel) north.getComponent(i);
+
+                        if (tempLabel.getText().equals("Waitlisted Books"))
+                        {
+                            north.remove(north.getComponent(i));
+
+                            // since removing something shifts "loop" to the right
+                            --i;
+                        }
+                    }
+                }
+
+                payFeesButton.setVisible(true);
+                bookInventoryButton.setVisible(true);
+                waitListListButton.setVisible(true);
+                returnButton.setVisible(true);
+                waitListedBooks.setVisible(false);
+
+                // TODO: SET FRAMES VISIBLE AGAIN WHEN GO BACK
+                north.setVisible(true);
+                center.setVisible(true);
+                west.setVisible(true);
+                east.setVisible(true);
+                south.setVisible(true);
+
+                frame.getContentPane().setLayout(new BorderLayout());
+                frame.add(west, BorderLayout.WEST);
+                frame.add(north, BorderLayout.NORTH);
+                frame.add(center, BorderLayout.CENTER);
+                frame.add(south, BorderLayout.SOUTH);
+                frame.add(east, BorderLayout.EAST);
+
+                north.setPreferredSize(new Dimension(1000, 300));
+
+                // TODO: ADD USERNAME
+                JLabel welcomeUserText = new JLabel();
+                welcomeUserText.setText("Welcome, " + "USERNAME_HERE" + "!");
+                welcomeUserText.setFont(new Font("Arial", Font.BOLD, 40));
+                welcomeUserText.setPreferredSize(new Dimension(950, 75));
+                welcomeUserText.setOpaque(false);
+                welcomeUserText.setVisible(true);
+                welcomeUserText.setHorizontalTextPosition(SwingConstants.LEFT);
+                welcomeUserText.setName("welcomeText"); // ID
+
+                accountButton.setVisible(false);
+                booksPanel.setVisible(false);
+                scrollPane.setVisible(false);
+                north.setVisible(true);
+                payFeesButton.setVisible(true);
+                waitListListButton.setVisible(true);
+                bookInventoryButton.setVisible(true);
+
+                center.setBorder(BorderFactory.createEmptyBorder(0, 9, 0, 0));
+                north.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+
+                north.add(welcomeUserText);
+                feePanel.add(payFeesButton);
+                north.add(feePanel);
+                accountPanel.add(bookInventoryButton);
+                accountPanel.add(waitListListButton);
+                center.add(accountPanel);
+
+                accountPanel.setLayout(new GridLayout(2, 1));
+                feePanel.setLayout(new GridLayout(2, 1));
+                north.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+                returnButton.setBackground(DEFAULT_COLOR);
             }
         }
 
@@ -673,7 +1013,6 @@ public class Library implements MouseListener
 
                 loginPanel.setVisible(false);
                 returnButton.setVisible(false);
-                passwordCheckBox.setVisible(false);
                 submitButton.setVisible(false);
                 scrollPane.setVisible(true);
 
@@ -686,7 +1025,6 @@ public class Library implements MouseListener
                 frame.setLayout(new GridBagLayout());
                 frame.add(scrollPane, panelConstraints);
 
-                // TODO: REMINDER TO POSSIBLY REMOVE THIS LATER
                 JLabel availableBooksText = new JLabel();
                 availableBooksText.setText("Available Books");
                 availableBooksText.setFont(new Font("Cambria", Font.BOLD, 40));
@@ -794,14 +1132,33 @@ public class Library implements MouseListener
             welcomeUserText.setHorizontalTextPosition(SwingConstants.LEFT);
             welcomeUserText.setName("welcomeText"); // ID
 
+            for (int i = 0; i < feePanel.getComponentCount(); i++)
+            {
+                JLabel temp;
+
+                if (feePanel.getComponent(i) instanceof JLabel)
+                {
+                    temp = (JLabel) feePanel.getComponent(i);
+
+                    if (temp.getName().equals("feePanelFeeText"))
+                    {
+                        feePanel.remove(feePanel.getComponent(i));
+
+                        // since removing something shifts "loop" to the right
+                        --i;
+                    }
+                }
+            }
+
             // TODO: ADD ACTUAL FEES
-            JLabel currentFees = new JLabel();
+            JLabel currentFees = currentFees = new JLabel();;
             currentFees.setText("Fees: " + "999" + "$");
             currentFees.setFont(new Font("Arial", Font.BOLD, 40));
             currentFees.setPreferredSize(new Dimension(950, 75));
             currentFees.setOpaque(false);
             currentFees.setVisible(true);
             currentFees.setHorizontalTextPosition(SwingConstants.LEFT);
+            currentFees.setName("feePanelFeeText");
 
             accountButton.setVisible(false);
             booksPanel.setVisible(false);
@@ -810,6 +1167,8 @@ public class Library implements MouseListener
             payFeesButton.setVisible(true);
             waitListListButton.setVisible(true);
             bookInventoryButton.setVisible(true);
+            feePanel.setVisible(true);
+            accountPanel.setVisible(true);
 
             frame.getContentPane().setLayout(new BorderLayout());
             frame.add(west, BorderLayout.WEST);
@@ -872,8 +1231,6 @@ public class Library implements MouseListener
                 {
                     tempFrame = (JPanel) north.getComponent(i);
 
-                    System.out.println(tempFrame.getName());
-
                     if (tempFrame.getName().equals("feePanel"))
                     {
                         north.remove(north.getComponent(i));
@@ -888,6 +1245,7 @@ public class Library implements MouseListener
             bookInventoryButton.setVisible(false);
             waitListListButton.setVisible(false);
             returnButton.setVisible(true);
+            inventoryOfBooks.setVisible(true);
 
             north.setBorder(null);
             center.setBorder(null);
@@ -980,8 +1338,6 @@ public class Library implements MouseListener
                 {
                     tempFrame = (JPanel) north.getComponent(i);
 
-                    System.out.println(tempFrame.getName());
-
                     if (tempFrame.getName().equals("feePanel"))
                     {
                         north.remove(north.getComponent(i));
@@ -996,6 +1352,7 @@ public class Library implements MouseListener
             bookInventoryButton.setVisible(false);
             waitListListButton.setVisible(false);
             returnButton.setVisible(true);
+            waitListedBooks.setVisible(true);
 
             north.setBorder(null);
             center.setBorder(null);
