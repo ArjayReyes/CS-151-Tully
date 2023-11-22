@@ -1,9 +1,14 @@
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class UIManager implements MouseListener
 {
@@ -62,18 +67,45 @@ public class UIManager implements MouseListener
     private User currentUser;
     private ArrayList<String> listOfErrors;
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws FileNotFoundException, ParseException {
         UIManager test = new UIManager();
     }
 
-    public UIManager()
-    {
+    public UIManager() throws FileNotFoundException, ParseException {
         users = new ArrayList<User>();
+
+        // File I/O for Users -- refactor to a new method
+        userDatabase();
 
         // probably have to create Library instance here maybe
 
         initialize();
+    }
+
+    public void userDatabase() throws FileNotFoundException, ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+        File userFile = new File("users.txt");
+        Scanner sc = new Scanner(userFile);
+        while (sc.hasNext()) {
+            String line = sc.nextLine();
+
+            // This split username, password, id, and books.
+            String[] userInfo = line.split(",");
+
+            // This split books, create ArrayList and bookInfo to create Book object.
+            String[] userBooks = userInfo[3].split(";");
+            String[] bookInfo;
+            ArrayList<Book> booksBorrowed = new ArrayList<Book>();
+
+            // for loop to obtain all borrowed books user has.
+            for (String userBook : userBooks) {
+                // This splits book information and add to user's borrowed books.
+                bookInfo = userBook.split("@");
+                Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], new Date(String.valueOf(format.parse(bookInfo[3]))));
+                booksBorrowed.add(book);
+            }
+            users.add(new User(userInfo[0], userInfo[1], Integer.parseInt(userInfo[2]), booksBorrowed));
+        }
     }
 
     public String getCurrentScreen()
@@ -138,15 +170,19 @@ public class UIManager implements MouseListener
 
             if (currentScreen.equals("signUp"))
             {
-                if (checkSignUpFields())
-                {
-                    hideCurrentScreen();
+                try {
+                    if (checkSignUpFields())
+                    {
+                        hideCurrentScreen();
 
-                    createSignUpSuccess();
-                }
-                else
-                {
-                    createErrorPopup();
+                        createSignUpSuccess();
+                    }
+                    else
+                    {
+                        createErrorPopup();
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
             else if (currentScreen.equals("login"))
@@ -781,8 +817,7 @@ public class UIManager implements MouseListener
     }
 
     // checks the username & password of the signup for any errors
-    public boolean checkSignUpFields()
-    {
+    public boolean checkSignUpFields() throws IOException {
         //Here we can make sure that username and password exist, and that the password fits the requirements.
         String usertxt = usernameSignUp.getText();
         String pass = String.valueOf(passwordSignUp.getPassword()); //.getText() is depreciated
@@ -873,8 +908,15 @@ public class UIManager implements MouseListener
         // empty = no errors found
         if (listOfErrors.isEmpty())
         {
-            User u = new User(usertxt, pass, Integer.parseInt(randoId), new ArrayList<Book>());
+            // TODO: Exception/Check if the off-chance two users have the same random ID?
+            int userId = Integer.parseInt(randoId);
+            BufferedWriter out = new BufferedWriter(new FileWriter("users.txt"));
+            out.write(usertxt + "," + pass + "," + userId + ",");
+            out.newLine();
+            out.close();
+            User u = new User(usertxt, pass, userId, new ArrayList<Book>());
             users.add(u);
+
             return true;
         }
         else
