@@ -8,6 +8,7 @@ import java.util.regex.*;
 public class UIManager implements MouseListener
 {
     private JFrame frame;
+    JFrame displayBookFrame;
     private JButton signUpButton;
     private JButton loginButton;
     private JButton returnButton;
@@ -16,6 +17,9 @@ public class UIManager implements MouseListener
     private JButton payFeesButton;
     private JButton bookInventoryButton;
     private JButton waitListListButton; // show list of waitlisted books
+    private JButton closeBookInfoButton;
+    private JButton borrowBookButton;
+    private JButton waitListBookButton;
     private JTextField usernameSignUp;
     private JPasswordField passwordSignUp;
     private JTextField usernameLogin;
@@ -33,6 +37,7 @@ public class UIManager implements MouseListener
     private JPanel waitListPanel;
     private JPanel accountPanel;
     private JPanel feePanel;
+    private JPanel bookInfoButtonPanel;
     private JScrollPane scrollPane;
     private JScrollPane inventoryOfBooks;
     private JScrollPane waitListedBooks;
@@ -46,6 +51,10 @@ public class UIManager implements MouseListener
     private JLabel passwordText;
     private JLabel signUpSuccessText;
     private JLabel currentFees;
+    private JLabel bookNameText;
+    private JLabel bookAuthorText;
+    private JLabel bookISBNText;
+    private JLabel bookAvailabilityText;
     private final Color RED = new Color(216, 80, 77);
     private final Color DEFAULT_COLOR = new JButton().getBackground();
     private final int DEFAULT_TIMEOUT_TIME = ToolTipManager.sharedInstance().getDismissDelay();
@@ -180,6 +189,28 @@ public class UIManager implements MouseListener
             createWaitlistScreen();
         }
 
+        // no book has ever been selected before
+        if (displayBookFrame != null && e.getSource() != borrowBookButton && e.getSource() != waitListBookButton)
+        {
+            // if a book has already been viewed, close the old screen
+            // to make room for the new book info screen
+            displayBookFrame.setVisible(false);
+        }
+
+        // TODO: MIGHT change to use array instead of panel?
+        if (currentScreen.equals("bookScreen")) // small optimization; no unnecessary loops when something clicked
+        {
+            createBookInfoScreen(booksPanel, e);
+        }
+        else if (currentScreen.equals("inventoryScreen"))
+        {
+            createBookInfoScreen(inventoryPanel, e);
+        }
+        else if (currentScreen.equals("waitlistedBooksScreen"))
+        {
+            createBookInfoScreen(waitListPanel, e);
+        }
+
         System.out.println(currentScreen);
     }
 
@@ -207,6 +238,89 @@ public class UIManager implements MouseListener
     @Override
     public void mouseClicked(MouseEvent e) {}
 
+    // removes html tags from a JButton's text
+    public String getJButtonTextWithoutHTML(JButton button)
+    {
+        StringBuilder returnMe = new StringBuilder();
+        // removes <html> & </html> tags & adds to the StringBuilder
+        returnMe.append(button.getText(), 6, button.getText().length() - 7);
+
+        // remove any <br>'s and replace the space it took by a single space
+        for (int i = 0; i < returnMe.length() - 4; i++)
+        {
+            if (returnMe.substring(i, i + 4).equals("<br>"))
+            {
+                returnMe.replace(i, i + 4, " ");
+            }
+        }
+
+        return returnMe.toString();
+    }
+
+    // displays the book's information after a button representing the book is pressed
+    public void createBookInfoScreen(JPanel someBookPanel, MouseEvent e)
+    {
+        JButton tempMouse = (JButton) e.getSource();
+
+        for (int i = 0; i < someBookPanel.getComponentCount(); i++)
+        {
+            JButton temp = (JButton) someBookPanel.getComponent(i);
+
+            // matches the same book buttons
+            // if it matches, create the info screen
+            if (tempMouse != null && tempMouse == someBookPanel.getComponent(i))
+            {
+                displayBookFrame = new JFrame(); // lazy way to "reset" the frame without hiding all the components
+                displayBookFrame.setLayout(new GridLayout(5, 1));
+                displayBookFrame.setSize(900, 500);
+                displayBookFrame.setTitle(getJButtonTextWithoutHTML(temp));
+                displayBookFrame.getContentPane().setBackground(new Color(121, 156, 185));
+                displayBookFrame.setResizable(false);
+                displayBookFrame.setLocationRelativeTo(null);
+                displayBookFrame.setVisible(true);
+                displayBookFrame.add(bookNameText);
+                displayBookFrame.add(bookAuthorText);
+                displayBookFrame.add(bookISBNText);
+                displayBookFrame.add(bookAvailabilityText);
+                displayBookFrame.add(bookInfoButtonPanel);
+                bookInfoButtonPanel.add(borrowBookButton);
+                bookInfoButtonPanel.add(waitListBookButton);
+                bookInfoButtonPanel.add(closeBookInfoButton);
+
+                closeBookInfoButton.setVisible(true);
+                borrowBookButton.setVisible(true);
+                waitListBookButton.setVisible(true);
+
+                // TODO: Set actual text
+                bookAuthorText.setVisible(true);
+                bookAuthorText.setText("Author: ");
+                // small indent
+                bookAuthorText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+                bookISBNText.setVisible(true);
+                bookISBNText.setText("ISBN: ");
+                bookISBNText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+                bookNameText.setVisible(true);
+                bookNameText.setText("Title: ");
+                bookNameText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+                bookAvailabilityText.setVisible(true);
+                bookAvailabilityText.setText("Availability: ");
+                bookAvailabilityText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+                borrowBookButton.setBackground(DEFAULT_COLOR);
+                waitListBookButton.setBackground(DEFAULT_COLOR);
+                closeBookInfoButton.setBackground(DEFAULT_COLOR);
+
+                break;
+            }
+        }
+    }
+
+    // initialize all instance variables
+    // creating a new object
+    // and setting their intial attributes
     public void initialize()
     {
         frame = new JFrame();
@@ -238,6 +352,10 @@ public class UIManager implements MouseListener
         payFeesButton = new JButton();
         accountPanel = new JPanel();
         feePanel = new JPanel();
+        closeBookInfoButton = new JButton();
+        borrowBookButton = new JButton();
+        waitListBookButton = new JButton();
+        bookInfoButtonPanel = new JPanel();
 
         frame.setSize(1000, 650);
         frame.setTitle("Tully Library");
@@ -259,6 +377,7 @@ public class UIManager implements MouseListener
         waitListPanel.setBackground(frame.getContentPane().getBackground());
         accountPanel.setBackground(frame.getContentPane().getBackground());
         feePanel.setBackground(frame.getContentPane().getBackground());
+        bookInfoButtonPanel.setBackground(frame.getContentPane().getBackground());
 
         welcomeText = new JLabel();
         welcomeText.setText("Tully Library");
@@ -313,6 +432,30 @@ public class UIManager implements MouseListener
         signUpSuccessText.setPreferredSize(new Dimension(600, 500));
         signUpSuccessText.setOpaque(false);
         signUpSuccessText.setVisible(true);
+
+        bookNameText = new JLabel();
+        bookNameText.setFont(new Font("Arial", Font.BOLD, 20));
+        bookNameText.setPreferredSize(new Dimension(850, 50));
+        bookNameText.setOpaque(false);
+        bookNameText.setVisible(true);
+
+        bookAuthorText = new JLabel();
+        bookAuthorText.setFont(new Font("Arial", Font.BOLD, 20));
+        bookAuthorText.setPreferredSize(new Dimension(850, 50));
+        bookAuthorText.setOpaque(false);
+        bookAuthorText.setVisible(true);
+
+        bookISBNText = new JLabel();
+        bookISBNText.setFont(new Font("Arial", Font.BOLD, 20));
+        bookISBNText.setPreferredSize(new Dimension(850, 50));
+        bookISBNText.setOpaque(false);
+        bookISBNText.setVisible(true);
+
+        bookAvailabilityText = new JLabel();
+        bookAvailabilityText.setFont(new Font("Arial", Font.BOLD, 20));
+        bookAvailabilityText.setPreferredSize(new Dimension(850, 50));
+        bookAvailabilityText.setOpaque(false);
+        bookAvailabilityText.setVisible(true);
 
         currentFees = new JLabel();
         currentFees.setFont(new Font("Arial", Font.BOLD, 40));
@@ -379,6 +522,27 @@ public class UIManager implements MouseListener
         bookInventoryButton.setVisible(false);
         bookInventoryButton.addMouseListener(this);
 
+        closeBookInfoButton.setText("Close");
+        closeBookInfoButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        closeBookInfoButton.setPreferredSize(new Dimension(150, 50));
+        closeBookInfoButton.setFont(new Font("Arial", Font.BOLD, 20));
+        closeBookInfoButton.setVisible(false);
+        closeBookInfoButton.addMouseListener(this);
+
+        borrowBookButton.setText("Borrow");
+        borrowBookButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        borrowBookButton.setPreferredSize(new Dimension(150, 50));
+        borrowBookButton.setFont(new Font("Arial", Font.BOLD, 20));
+        borrowBookButton.setVisible(false);
+        borrowBookButton.addMouseListener(this);
+
+        waitListBookButton.setText("Waitlist");
+        waitListBookButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        waitListBookButton.setPreferredSize(new Dimension(150, 50));
+        waitListBookButton.setFont(new Font("Arial", Font.BOLD, 20));
+        waitListBookButton.setVisible(false);
+        waitListBookButton.addMouseListener(this);
+
         usernameSignUp.setFont(new Font("Arial", Font.BOLD, 40));
         usernameSignUp.setPreferredSize(new Dimension(600, 100));
         usernameSignUp.setText("Enter your username here");
@@ -423,12 +587,16 @@ public class UIManager implements MouseListener
 
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
         scrollPane.setPreferredSize(new Dimension(500, 435));
+        // changes vertical scroll bar scrolling speed
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10);
 
         inventoryOfBooks.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
         inventoryOfBooks.setPreferredSize(new Dimension(500, 435));
+        inventoryOfBooks.getVerticalScrollBar().setUnitIncrement(10);
 
         waitListedBooks.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
         waitListedBooks.setPreferredSize(new Dimension(500, 435));
+        waitListedBooks.getVerticalScrollBar().setUnitIncrement(10);
 
         frame.getContentPane().setLayout(new BorderLayout());
 
@@ -446,6 +614,8 @@ public class UIManager implements MouseListener
         frame.repaint();
     }
 
+    // creates the main screen
+    // the screen that users see first when first opening the application
     public void createMain()
     {
         currentScreen = "main";
@@ -458,16 +628,22 @@ public class UIManager implements MouseListener
         signUpButton.setVisible(true);
         loginButton.setVisible(true);
 
+        // makes it so the components "flow" like text
+        // the flow can be customized to be focused on the left, center, etc
+        // FlowLayout is also the default layout
         center.setLayout(new FlowLayout(FlowLayout.CENTER));
         north.setLayout(new FlowLayout(FlowLayout.CENTER));
         west.setLayout(new FlowLayout(FlowLayout.CENTER));
         east.setLayout(new FlowLayout(FlowLayout.CENTER));
         south.setLayout(new FlowLayout(FlowLayout.CENTER));
 
+        // pushes north & center certain distances
+        // helps make screen look a little nicer
         north.setBorder(BorderFactory.createEmptyBorder(0, 300, 150, 0));
         center.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
     }
 
+    // creates the signup screen
     public void createSignUp()
     {
         currentScreen = "signUp";
@@ -507,11 +683,14 @@ public class UIManager implements MouseListener
         // so text is far apart
         // so 3 makes text more "tight"
         // GridLayout also takes into consideration every component, visible or not
+        // in this case, splits layout into 3 rows
+        // and 1 column
         west.setLayout(new GridLayout(3, 1));
         center.setLayout(new FlowLayout(FlowLayout.LEFT));
         signUpPanel.setLayout(new GridLayout(2, 1));
         south.setLayout(new FlowLayout(FlowLayout.CENTER));
 
+        // beautifying the screen a bit
         north.setBorder(BorderFactory.createEmptyBorder(0, 300, 100, 0));
         center.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
         west.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
@@ -524,12 +703,15 @@ public class UIManager implements MouseListener
         returnButton.setBackground(DEFAULT_COLOR);
     }
 
+    // creates success screen upon successfully signing up
     public void createSignUpSuccess()
     {
         currentScreen = "signUpSuccess";
 
         returnButton.setText("Home");
 
+        // html text
+        // &emsp = 4 empty spaces
         signUpSuccessText.setText("<html>" + "&emsp&emsp&emsp&emsp&emsp&emsp&emsp Successfully signed up!" + "</html>");
         signUpSuccessText.setPreferredSize(new Dimension(1000, 400));
 
@@ -543,12 +725,15 @@ public class UIManager implements MouseListener
         north.setBorder(BorderFactory.createEmptyBorder(0, 300, 0, 0));
     }
 
+    // creates a popup that tells the user what they still need
+    // for login or signup usernames or passwords
     public void createErrorPopup()
     {
         StringBuilder errors = new StringBuilder();
 
         errors.append("<html>");
 
+        // checks error keys to know which errors to display
         for (int i = 0; i < listOfErrors.size(); i++)
         {
             switch(listOfErrors.get(i))
@@ -584,36 +769,42 @@ public class UIManager implements MouseListener
 
             if (i != errors.length() - 1)
             {
+                // line break
                 errors.append(" <br> ");
             }
         }
 
         errors.append("</html>");
 
+        // display the error
         JOptionPane.showMessageDialog(frame, errors.toString());
     }
 
+    // checks the username & password of the signup for any errors
     public boolean checkSignUpFields()
     {
         //Here we can make sure that username and password exist, and that the password fits the requirements.
         String usertxt = usernameSignUp.getText();
         String pass = String.valueOf(passwordSignUp.getPassword()); //.getText() is depreciated
+        // check if foreground is grey since a possible username or password could be "Enter your username here"
+        boolean checkUsername = usertxt.equals("Enter your username here") && usernameSignUp.getForeground() == Color.GRAY;
+        boolean checkPassword = pass.equals("Enter your password here") && passwordSignUp.getForeground() == Color.GRAY;
         listOfErrors = new ArrayList<String>();
 
         //one field is empty
         // or both fields are empty
-        if ((usertxt.equals("Enter your username here") || usertxt.isEmpty()) && (pass.equals("Enter your password here") || pass.isEmpty())) {
+        if ((checkUsername || usertxt.isEmpty()) && (checkPassword || pass.isEmpty())) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             listOfErrors.add("emptyPass");
             return false;
         }
-        else if (usertxt.equals("Enter your username here") || usertxt.isEmpty()) {
+        else if (checkUsername || usertxt.isEmpty()) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             return false;
         }
-        else if (pass.equals("Enter your password here") || pass.isEmpty()) {
+        else if (checkPassword || pass.isEmpty()) {
             System.out.println("bruh");
             listOfErrors.add("emptyPass");
             return false;
@@ -679,6 +870,7 @@ public class UIManager implements MouseListener
             randoId += r.nextInt(10);
         }
 
+        // empty = no errors found
         if (listOfErrors.isEmpty())
         {
             User u = new User(usertxt, pass, Integer.parseInt(randoId), new ArrayList<Book>());
@@ -691,6 +883,8 @@ public class UIManager implements MouseListener
         }
     }
 
+    // creates the actual library
+    // displays available books and allows user to access their account
     public void createBookScreen()
     {
         currentScreen = "bookScreen";
@@ -714,15 +908,21 @@ public class UIManager implements MouseListener
         booksPanel.setBorder(LineBorder.createBlackLineBorder());
         booksPanel.setVisible(true);
 
-        GridBagConstraints panelConstraints = new GridBagConstraints(); // GRIDBAG MAKES NO SENSE
-        panelConstraints.gridx = 1; // lower numbers = left side, higher numbers = right side?
-        panelConstraints.gridy = 1;
+        // Spent 3 hours trying to understand GridBag
+        // still makes no sense
+        // plugging in somewhat random values for the constraints works
+        // puts scroll pane on the bottom middle of the screen
+        GridBagConstraints panelConstraints = new GridBagConstraints();
+        panelConstraints.gridx = 1; // lower numbers = left, higher numbers = right?
+        panelConstraints.gridy = 1; // lower numbers = top, larger numbers = bottom?
         frame.setLayout(new GridBagLayout());
         frame.add(scrollPane, panelConstraints);
 
+        // puts text right above the scrollPane
         availableBooksText.setVisible(true);
         north.add(availableBooksText);
 
+        // puts the welcome text right above the "Available Books" text
         panelConstraints.gridx = 1;
         panelConstraints.gridy = 0;
         frame.add(north, panelConstraints); // replaces existing north
@@ -738,11 +938,14 @@ public class UIManager implements MouseListener
             temp.setFont(new Font("Calibri", Font.BOLD, 25));
             temp.setHorizontalAlignment(SwingConstants.LEFT);
             temp.setPreferredSize(new Dimension(450, 100));
+            temp.addMouseListener(this);
+            temp.setName(i + "");
             booksPanel.add(temp);
         }
 
         booksPanel.setLayout(new GridLayout(booksPanel.getComponentCount(), 1));
 
+        // puts account & return button to the right
         east.add(accountButton); // Account button panel
         east.setLayout(new GridBagLayout());
         accountButton.setVisible(true);
@@ -758,13 +961,13 @@ public class UIManager implements MouseListener
         frame.add(south, panelConstraints);
     }
 
+    // creates the account screen
+    // shows the user's fees & inventory of books or waitlisted books
     public void createAccountScreen()
     {
         currentScreen = "accountScreen";
 
         north.setPreferredSize(new Dimension(1000, 300));
-
-        System.out.println(users.size());
 
         welcomeUserText.setText("Welcome, " + currentUser.getName()+ "!");
         welcomeUserText.setFont(new Font("Arial", Font.BOLD, 40));
@@ -811,6 +1014,7 @@ public class UIManager implements MouseListener
         returnButton.setBackground(DEFAULT_COLOR);
     }
 
+    // create the user's inventory screen of all the books they have borrowed
     public void createInventoryScreen()
     {
         currentScreen = "inventoryScreen";
@@ -846,6 +1050,7 @@ public class UIManager implements MouseListener
             temp.setFont(new Font("Calibri", Font.BOLD, 25));
             temp.setHorizontalAlignment(SwingConstants.LEFT);
             temp.setPreferredSize(new Dimension(450, 100));
+            temp.addMouseListener(this);
             inventoryPanel.add(temp);
         }
 
@@ -860,6 +1065,7 @@ public class UIManager implements MouseListener
         frame.add(south, panelConstraints);
     }
 
+    // creates the user's waitlist screen of all the books they want to borrow
     public void createWaitlistScreen()
     {
         currentScreen = "waitlistedBooksScreen";
@@ -901,6 +1107,7 @@ public class UIManager implements MouseListener
             temp.setFont(new Font("Calibri", Font.BOLD, 25));
             temp.setHorizontalAlignment(SwingConstants.LEFT);
             temp.setPreferredSize(new Dimension(450, 100));
+            temp.addMouseListener(this);
             waitListPanel.add(temp);
         }
 
@@ -915,27 +1122,30 @@ public class UIManager implements MouseListener
         frame.add(south, panelConstraints);
     }
 
+    // checks login username & password for any errors
     public boolean checkLoginFields()
     {
         //verify if this person's login credentials are correct.
         String usertxt = usernameLogin.getText();
         String pass = passwordLogin.getText();
+        boolean checkUsername = usertxt.equals("Enter your username here") && usernameSignUp.getForeground() == Color.GRAY;
+        boolean checkPassword = pass.equals("Enter your password here") && passwordSignUp.getForeground() == Color.GRAY;
         listOfErrors = new ArrayList<String>();
 
         //one field is empty
         // or both fields are empty
-        if ((usertxt.equals("Enter your username here") || usertxt.isEmpty()) && (pass.equals("Enter your password here") || pass.isEmpty())) {
+        if ((checkUsername || usertxt.isEmpty()) && (checkPassword || pass.isEmpty())) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             listOfErrors.add("emptyPass");
             return false;
         }
-        else if (usertxt.equals("Enter your username here") || usertxt.isEmpty()) {
+        else if (checkUsername || usertxt.isEmpty()) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             return false;
         }
-        else if (pass.equals("Enter your password here") || pass.isEmpty()) {
+        else if (checkPassword || pass.isEmpty()) {
             System.out.println("bruh");
             listOfErrors.add("emptyPass");
             return false;
@@ -954,6 +1164,7 @@ public class UIManager implements MouseListener
         return true;
     }
 
+    // creates the login screen
     public void createLogin()
     {
         currentScreen = "login";
@@ -1016,6 +1227,9 @@ public class UIManager implements MouseListener
         frame.add(east, BorderLayout.EAST);
     }
 
+    // hides the current screen right before transitioning to another screen
+    // the transition is not part of this
+    // but all the "create" methods
     public void hideCurrentScreen()
     {
         if (currentScreen.equals("signUp"))
@@ -1097,15 +1311,22 @@ public class UIManager implements MouseListener
         }
     }
 
+    // changes the username & password fields based on when they were clicked
+    // ex: username & password not clicked, color = gray and says "Enter your password/username here"
+    // when its clicked, field becomes empty and color changes to black
+    // also checks if the passwordCheckBox was clicked
+    // to display the password or not
     public void checkUserFieldsClickable(EventObject e)
     {
         // check currentScreen since invisible stuff can still get clicked somehow
+        // if not clicked already clicked
         if (e.getSource() == usernameSignUp && usernameSignUp.getForeground() == Color.GRAY)
         {
             usernameSignUp.setText("");
             usernameSignUp.setForeground(Color.BLACK);
             usernameSignUp.setEditable(true);
         }
+        // if already clicked
         else if (usernameSignUp.getText().isEmpty())
         {
             usernameSignUp.setText("Enter your username here");
@@ -1113,6 +1334,7 @@ public class UIManager implements MouseListener
             usernameSignUp.setEditable(false);
         }
 
+        // if already clicked but hide the password
         if (e.getSource() == passwordSignUp && passwordSignUp.getForeground() == Color.GRAY && !passwordCheckBox.isSelected())
         {
             passwordSignUp.setForeground(Color.BLACK);
@@ -1120,6 +1342,7 @@ public class UIManager implements MouseListener
             passwordSignUp.setText("");
             passwordSignUp.setEditable(true);
         }
+        // if already clicked but show the password
         else if (e.getSource() == passwordSignUp && passwordSignUp.getForeground() == Color.GRAY && passwordCheckBox.isSelected())
         {
             passwordSignUp.setForeground(Color.BLACK);
@@ -1127,6 +1350,7 @@ public class UIManager implements MouseListener
             passwordSignUp.setText("");
             passwordSignUp.setEditable(true);
         }
+        // if not clicked already clicked
         else if (String.valueOf(passwordSignUp.getPassword()).isEmpty())
         {
             passwordSignUp.setForeground(Color.GRAY);
@@ -1152,12 +1376,14 @@ public class UIManager implements MouseListener
             passwordSignUp.setText(String.valueOf(passwordSignUp.getPassword()));
         }
 
+        // if not clicked already clicked
         if (e.getSource() == usernameLogin && usernameLogin.getForeground() == Color.GRAY)
         {
             usernameLogin.setForeground(Color.BLACK);
             usernameLogin.setText("");
             usernameLogin.setEditable(true);
         }
+        // if already clicked
         else if (usernameLogin.getText().isEmpty())
         {
             usernameLogin.setForeground(Color.GRAY);
@@ -1165,6 +1391,7 @@ public class UIManager implements MouseListener
             usernameLogin.setEditable(false);
         }
 
+        // if not clicked already clicked
         if (e.getSource() == passwordLogin && passwordLogin.getForeground() == Color.GRAY)
         {
             passwordLogin.setForeground(Color.BLACK);
@@ -1172,6 +1399,7 @@ public class UIManager implements MouseListener
             passwordLogin.setText("");
             passwordLogin.setEditable(true);
         }
+        // if already clicked
         else if (String.valueOf(passwordLogin.getPassword()).isEmpty())
         {
             passwordLogin.setForeground(Color.GRAY);
@@ -1181,6 +1409,8 @@ public class UIManager implements MouseListener
         }
     }
 
+    // checks if mouse is hovering over a button
+    // if it is, change the color to red
     public void checkMouseHover(MouseEvent e)
     {
         if (e.getSource() == signUpButton)
@@ -1223,13 +1453,32 @@ public class UIManager implements MouseListener
             waitListListButton.setBackground(RED);
         }
 
+        if (e.getSource() == borrowBookButton)
+        {
+            borrowBookButton.setBackground(RED);
+        }
+
+        if (e.getSource() == closeBookInfoButton)
+        {
+            closeBookInfoButton.setBackground(RED);
+        }
+
+        if (e.getSource() == waitListBookButton)
+        {
+            waitListBookButton.setBackground(RED);
+        }
+
+        // show tooltip/hint for password
         if (e.getSource() == passwordCheckBox)
         {
             passwordCheckBox.setBackground(new Color(35, 48, 84));
             passwordCheckBox.setToolTipText("Click me to show the password!");
-            ToolTipManager.sharedInstance().setDismissDelay(10000); // 10 seconds
+            // 10 seconds
+            // increase time before tooltip disappears
+            ToolTipManager.sharedInstance().setDismissDelay(10000);
         }
 
+        // show tooltip/requirements for password signup
         if (e.getSource() == passwordSignUp)
         {
             passwordSignUp.setToolTipText("<html>" +
@@ -1240,10 +1489,13 @@ public class UIManager implements MouseListener
                     "Password must have a lowercase character.<br>" +
                     "Password must have a number." +
                     "</html>");
-            ToolTipManager.sharedInstance().setDismissDelay(30000); // 30 seconds
+            // 30 seconds
+            ToolTipManager.sharedInstance().setDismissDelay(30000);
         }
     }
 
+    // checks if mouse is not hovering over a button
+    // if not, change color to the default color
     public void checkMouseStoppedHovering(MouseEvent e)
     {
         if (e.getSource() == signUpButton)
@@ -1284,6 +1536,21 @@ public class UIManager implements MouseListener
         if (e.getSource() == waitListListButton)
         {
             waitListListButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == borrowBookButton)
+        {
+            borrowBookButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == closeBookInfoButton)
+        {
+            closeBookInfoButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == waitListBookButton)
+        {
+            waitListBookButton.setBackground(DEFAULT_COLOR);
         }
 
         if (e.getSource() == passwordCheckBox)
