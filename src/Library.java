@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.*;
 
 public class Library
@@ -7,13 +9,11 @@ public class Library
     // Users temporarily have to be stored in the UIManager class, but should not be WHEN USERS ARE STORED TO A TXT FILE
     private User currentUser;
     private ArrayList<User> users;
-    public Library()
-    {
+    public Library() throws FileNotFoundException, ParseException {
         books = new ArrayList<Book>();
     }
 
-    public Library(ArrayList<Book> books, ArrayList<User> users)
-    {
+    public Library(ArrayList<Book> books, ArrayList<User> users) throws FileNotFoundException, ParseException {
         this.books = books;
     }
 
