@@ -4,15 +4,15 @@ public class Book {
     private String title;
     private String author;
     private String ISBN;
-    // state represents if a Book has a return date (true) or not (false)
-    private boolean state = false;
+    private boolean isBorrowed = false;
     private Date returnDate;
 
-    // constructor for book with no return date
+    // constructor for book with no return date; default is January 1st, 2000
     public Book(String title, String author, String ISBN) {
         this.title = title;
         this.author = author;
         this.ISBN = ISBN;
+        this.returnDate = (new Date(2025, 1, 1));
     }
 
     // constructor for book with returnDate
@@ -21,7 +21,7 @@ public class Book {
         this.author = author;
         this.ISBN = ISBN;
         this.returnDate = returnDate;
-        this.state = true;
+        this.isBorrowed = true;
     }
 
     public String getTitle() {
@@ -48,8 +48,8 @@ public class Book {
         this.ISBN = ISBN;
     }
 
-    public boolean isCheckedOut() {
-        return state;
+    public boolean isBorrowed() {
+        return isBorrowed;
     }
 
     public Date getReturnDate() {
@@ -57,17 +57,20 @@ public class Book {
     }
 
     // Use this setter in Library to create a returnDate for book
-    // sets returnDate AND state
+    // sets returnDate AND isBorrowed
+    // maybe set returnDate to a week (7 days) when book is checked out.
     public void setReturnDate(Date returnDate) {
         this.returnDate = returnDate;
-        this.state = true;
+        this.isBorrowed = true;
     }
+
+
 
     public String toString() {
         return  "Title: " + title +
                 "Author: " + author +
                 "ISBN: " + ISBN +
-                "State: " + state +
+                "State: " + isBorrowed +
                 "Return Date: " + returnDate;
     }
 }
