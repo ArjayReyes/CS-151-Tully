@@ -5,8 +5,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,37 +77,71 @@ public class UIManager implements MouseListener
     public UIManager() throws FileNotFoundException, ParseException {
         users = new ArrayList<User>();
 
-        // File I/O for Users -- refactor to a new method
-        userDatabase();
+        // File I/O method for Users
+        loadUserDatabase(users);
 
         // probably have to create Library instance here maybe
 
         initialize();
     }
 
-    public void userDatabase() throws FileNotFoundException, ParseException {
-        SimpleDateFormat format = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
-        File userFile = new File("users.txt");
+    public void loadUserDatabase(ArrayList<User> users) throws FileNotFoundException, ParseException {
+        File userFile = new File("userDatabase.txt");
         Scanner sc = new Scanner(userFile);
+        int count = 1;
+
         while (sc.hasNext()) {
-            String line = sc.nextLine();
-
-            // This split username, password, id, and books.
-            String[] userInfo = line.split(",");
-
-            // This split books, create ArrayList and bookInfo to create Book object.
-            String[] userBooks = userInfo[3].split(";");
-            String[] bookInfo;
-            ArrayList<Book> booksBorrowed = new ArrayList<Book>();
-
-            // for loop to obtain all borrowed books user has.
-            for (String userBook : userBooks) {
-                // This splits book information and add to user's borrowed books.
-                bookInfo = userBook.split("@");
-                Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], new Date(String.valueOf(format.parse(bookInfo[3]))));
-                booksBorrowed.add(book);
+            User fileUser = new User();
+            // checks 'first' line which should have username, password, and libraryID
+            if (count == 1) {
+                String line = sc.nextLine();
+                String[] userInfo = line.split(",");
+                fileUser.setName(userInfo[0]);
+                fileUser.setPassword(userInfo[1]);
+                fileUser.setLibraryID(Integer.parseInt(userInfo[2]));
+                count++;
             }
-            users.add(new User(userInfo[0], userInfo[1], Integer.parseInt(userInfo[2]), booksBorrowed));
+
+            // next line for borrowedBooks
+            else if (count == 2) {
+                String line = sc.nextLine();
+                ArrayList<Book> booksBorrowed = new ArrayList<Book>();
+                fileUser.setBooksWaitlisted(booksBorrowed);
+                if (!(line.isBlank())) {
+                    String[] borrowedBooksInfo = line.split(";");
+                    String[] bookInfo;
+                    for (String borrowedBooks : borrowedBooksInfo) {
+                        // This splits book information and add to user's borrowed books.
+                        bookInfo = borrowedBooks.split(",");
+                        // utilizes returnDate constructor
+                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], LocalDate.parse(bookInfo[3]));
+                        booksBorrowed.add(book);
+                    }
+                    fileUser.setBooksBorrowed(booksBorrowed);
+                }
+                fileUser.setBooksWaitlisted(booksBorrowed);
+                count++;
+            }
+
+            else if (count == 3) {
+                String line = sc.nextLine();
+                ArrayList<Book> booksWaitlisted = new ArrayList<Book>();
+                fileUser.setBooksWaitlisted(booksWaitlisted);
+                if (!(line.isBlank())) {
+                    String[] waitlistedBooksInfo = line.split(";");
+                    String[] bookInfo;
+                    for (String waitlistedBooks : waitlistedBooksInfo) {
+                        bookInfo = waitlistedBooks.split(",");
+                        // utilizes non-returnDate constructor and is set as waitlisted
+                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2]);
+                        book.setIsWaitlisted(true);
+                        booksWaitlisted.add(book);
+                    }
+                    fileUser.setBooksWaitlisted(booksWaitlisted);
+                }
+                count = 1;
+            }
+            users.add(fileUser);
         }
     }
 
@@ -910,11 +947,21 @@ public class UIManager implements MouseListener
         {
             // TODO: Exception/Check if the off-chance two users have the same random ID?
             int userId = Integer.parseInt(randoId);
-            BufferedWriter out = new BufferedWriter(new FileWriter("users.txt"));
-            out.write(usertxt + "," + pass + "," + userId + ",");
-            out.newLine();
-            out.close();
-            User u = new User(usertxt, pass, userId, new ArrayList<Book>());
+            // TODO: refactor later into its own method with parameters for username, password, id
+            File f = new File("users.txt");
+            if (f.exists() && !f.isDirectory()) {
+                BufferedWriter out = new BufferedWriter(new FileWriter("users.txt", true));
+                out.write(usertxt + "," + pass + "," + userId);
+                out.newLine();
+                out.close();
+            }
+            else {
+                BufferedWriter out = new BufferedWriter(new FileWriter("users.txt"));
+                out.write(usertxt + "," + pass + "," + userId);
+                out.newLine();
+                out.close();
+            }
+            User u = new User(usertxt, pass, userId, new ArrayList<Book>(), new ArrayList<Book>());
             users.add(u);
 
             return true;
