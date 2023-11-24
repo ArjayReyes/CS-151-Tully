@@ -77,6 +77,7 @@ public class UIManager implements MouseListener, ChangeListener
     private final Color DEFAULT_COLOR = new JButton().getBackground();
     private final int DEFAULT_TIMEOUT_TIME = ToolTipManager.sharedInstance().getDismissDelay();
     private final String TODAY = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
+    private String currentDate = TODAY;
     private ArrayList<User> users;
     private User currentUser;
     private ArrayList<String> listOfErrors;
@@ -306,6 +307,7 @@ public class UIManager implements MouseListener, ChangeListener
         {
             currentDateText.setText("Current Date: " + TODAY);
             incrementDatesSpinner.setValue(0); // autoboxing from primitive int -> Integer
+            currentDate = TODAY;
         }
 
         System.out.println(currentScreen);
@@ -1790,8 +1792,8 @@ public class UIManager implements MouseListener, ChangeListener
     {
         if (e.getSource() == incrementDatesSpinner)
         {
-            String newDate = LocalDate.parse(TODAY).plusDays((Integer) incrementDatesSpinner.getValue()).toString();
-            currentDateText.setText("Current Date: " + newDate);
+            currentDate = LocalDate.parse(TODAY).plusDays((Integer) incrementDatesSpinner.getValue()).toString();
+            currentDateText.setText("Current Date: " + currentDate);
         }
     }
 }
