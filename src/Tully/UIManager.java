@@ -1,5 +1,3 @@
-package Tully;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -16,9 +14,6 @@ import java.util.EventObject;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static Tully.Library.loadBookDatabase;
-import static Tully.Library.loadUserDatabase;
 
 public class UIManager implements MouseListener, ChangeListener
 {
@@ -86,6 +81,9 @@ public class UIManager implements MouseListener, ChangeListener
     private ArrayList<Book> books;
     private User currentUser;
     private ArrayList<String> listOfErrors;
+    // to keep track of the current book selected
+    // so that there is no need for more loops/checking what book has been selected
+    private Book currentBookSelected;
 
     public static void main(String[] args) throws FileNotFoundException, ParseException {
         UIManager test = new UIManager();
@@ -96,8 +94,8 @@ public class UIManager implements MouseListener, ChangeListener
         books = new ArrayList<Book>();
 
         // File I/O method for Users
-        loadUserDatabase(users);
-        loadBookDatabase(books);
+        Library.loadUserDatabase(users);
+        Library.loadBookDatabase(books);
 
         // probably have to create Library instance here maybe
 
@@ -236,18 +234,17 @@ public class UIManager implements MouseListener, ChangeListener
             displayBookFrame.setVisible(false);
         }
 
-        // TODO: MIGHT change to use array instead of panel?
         if (currentScreen.equals("bookScreen")) // small optimization; no unnecessary loops when something clicked
         {
-            createBookInfoScreen(booksPanel, e);
+            createBookInfoScreen(booksPanel, e, books);
         }
         else if (currentScreen.equals("inventoryScreen"))
         {
-            createBookInfoScreen(inventoryPanel, e);
+            createBookInfoScreen(inventoryPanel, e, currentUser.getBooksBorrowed());
         }
         else if (currentScreen.equals("waitlistedBooksScreen"))
         {
-            createBookInfoScreen(waitListPanel, e);
+            createBookInfoScreen(waitListPanel, e, currentUser.getBooksWaitlisted());
         }
 
         if (e.getSource() == resetDateButton)
@@ -255,6 +252,35 @@ public class UIManager implements MouseListener, ChangeListener
             currentDateText.setText("Current Date: " + TODAY);
             incrementDatesSpinner.setValue(0); // autoboxing from primitive int -> Integer
             currentDate = TODAY;
+        }
+
+        if (e.getSource() == borrowBookButton)
+        {
+            if (currentBookSelected.getIsWaitlisted())
+            {
+                JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " is currently in use!");
+            }
+            else if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksBorrowed()))
+            {
+                currentUser.getBooksBorrowed().add(currentBookSelected);
+                JOptionPane.showMessageDialog(frame, "Success!");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(frame, "You have already borrowed " + currentBookSelected.getTitle());
+            }
+        }
+        else if (e.getSource() == waitListBookButton)
+        {
+            if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksWaitlisted()))
+            {
+                currentUser.getBooksWaitlisted().add(currentBookSelected);
+                JOptionPane.showMessageDialog(frame, "Success!");
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(frame, "You have already waitlisted " + currentBookSelected.getTitle());
+            }
         }
 
         System.out.println(currentScreen);
@@ -284,6 +310,21 @@ public class UIManager implements MouseListener, ChangeListener
     @Override
     public void mouseClicked(MouseEvent e) {}
 
+    // checks if there is a duplicate book in checkMe
+    // assuming that all ISBN's are unique
+    public boolean checkDuplicateBook(Book book, ArrayList<Book> checkMe)
+    {
+        for (int i = 0; i < checkMe.size(); i++)
+        {
+            if (book.getISBN().equals(checkMe.get(i).getISBN()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // removes html tags from a JButton's text
     public String getJButtonTextWithoutHTML(JButton button)
     {
@@ -304,7 +345,7 @@ public class UIManager implements MouseListener, ChangeListener
     }
 
     // displays the book's information after a button representing the book is pressed
-    public void createBookInfoScreen(JPanel someBookPanel, MouseEvent e)
+    public void createBookInfoScreen(JPanel someBookPanel, MouseEvent e, ArrayList<Book> checkMe)
     {
         JButton tempMouse = (JButton) e.getSource();
 
@@ -316,14 +357,19 @@ public class UIManager implements MouseListener, ChangeListener
             // if it matches, create the info screen
             if (tempMouse != null && tempMouse == someBookPanel.getComponent(i))
             {
+                // since button follows the book's arraylist,
+                // the buttons must be in the same order as the books
+                Book tempBook = findBook(temp, checkMe);
+
                 displayBookFrame = new JFrame(); // lazy way to "reset" the frame without hiding all the components
                 displayBookFrame.setLayout(new GridLayout(5, 1));
                 displayBookFrame.setSize(900, 500);
-                displayBookFrame.setTitle(getJButtonTextWithoutHTML(temp));
+                displayBookFrame.setTitle(tempBook.getTitle());
                 displayBookFrame.getContentPane().setBackground(new Color(121, 156, 185));
                 displayBookFrame.setResizable(false);
                 displayBookFrame.setLocationRelativeTo(null);
                 displayBookFrame.setVisible(true);
+
                 displayBookFrame.add(bookNameText);
                 displayBookFrame.add(bookAuthorText);
                 displayBookFrame.add(bookISBNText);
@@ -334,34 +380,86 @@ public class UIManager implements MouseListener, ChangeListener
                 bookInfoButtonPanel.add(closeBookInfoButton);
 
                 closeBookInfoButton.setVisible(true);
-                borrowBookButton.setVisible(true);
-                waitListBookButton.setVisible(true);
+                if (currentScreen.equals("bookScreen"))
+                {
+                    borrowBookButton.setVisible(true);
+                    waitListBookButton.setVisible(true);
+                }
+                // users should be able to borrow books inside their waitlist list screen
+                else if (currentScreen.equals("waitlistedBooksScreen"))
+                {
+                    borrowBookButton.setVisible(true);
+                    waitListBookButton.setVisible(false);
+                }
+                else
+                {
+                    borrowBookButton.setVisible(false);
+                    waitListBookButton.setVisible(false);
+                }
 
-                // TODO: Set actual text
                 bookAuthorText.setVisible(true);
-                bookAuthorText.setText("Author: ");
+                bookAuthorText.setText("Author: " + tempBook.getAuthor());
                 // small indent
                 bookAuthorText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookISBNText.setVisible(true);
-                bookISBNText.setText("ISBN: ");
+                bookISBNText.setText("ISBN: " + tempBook.getISBN());
                 bookISBNText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookNameText.setVisible(true);
-                bookNameText.setText("Title: ");
+                bookNameText.setText("Title: " + tempBook.getTitle());
                 bookNameText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookAvailabilityText.setVisible(true);
-                bookAvailabilityText.setText("Availability: ");
+                if (tempBook.getIsWaitlisted())
+                {
+                    bookAvailabilityText.setText("Availability: In Use");
+                }
+                else
+                {
+                    bookAvailabilityText.setText("Availability: Available");
+                }
                 bookAvailabilityText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 borrowBookButton.setBackground(DEFAULT_COLOR);
                 waitListBookButton.setBackground(DEFAULT_COLOR);
                 closeBookInfoButton.setBackground(DEFAULT_COLOR);
 
+                currentBookSelected = tempBook;
+
                 break;
             }
         }
+    }
+
+    // gets the isbn from the JButton's text
+    public String separateISBNInButton(JButton button)
+    {
+        String temp = getJButtonTextWithoutHTML(button);
+
+        int ISBNIndex = temp.indexOf("ISBN: ");
+
+        // add "ISBN: ".length() to get end index of the "ISBN: " string
+        // so that only the ISBN is returned
+        return temp.substring(ISBNIndex + "ISBN: ".length());
+    }
+
+    // finds a book from a JButton, returns null if not found
+    public Book findBook(JButton button, ArrayList<Book> checkMe)
+    {
+        String ISBN = separateISBNInButton(button);
+        Book returnMe = null;
+
+        for (int i = 0; i < checkMe.size(); i++)
+        {
+            if (checkMe.get(i).getISBN().equals(ISBN))
+            {
+                returnMe = checkMe.get(i);
+                break;
+            }
+        }
+
+        return returnMe;
     }
 
     // initialize all instance variables
@@ -1030,19 +1128,22 @@ public class UIManager implements MouseListener, ChangeListener
         frame.add(north, panelConstraints); // replaces existing north
         north.setPreferredSize(new Dimension(650, 175));
 
-        // TODO: ADD ACTUAL BOOKS
-        // TODO: ADD WAIT LIST WHEN PRESS BOOK IF ALREADY BORROWED
-        // probably want to get rid of this for loop at some point
-        for (int i = 0; i < 25; i++)
+        // no need to keep making multiple JButtons for just the database
+        if (booksPanel.getComponentCount() == 0)
         {
-            JButton temp = new JButton();
-            temp.setText("<html>Book " + i + "<br>Author: Bob</html>");
-            temp.setFont(new Font("Calibri", Font.BOLD, 25));
-            temp.setHorizontalAlignment(SwingConstants.LEFT);
-            temp.setPreferredSize(new Dimension(450, 100));
-            temp.addMouseListener(this);
-            temp.setName(i + "");
-            booksPanel.add(temp);
+            for (int i = 0; i < books.size(); i++)
+            {
+                String title = books.get(i).getTitle();
+                String isbn = books.get(i).getISBN();
+
+                JButton temp = new JButton();
+                temp.setText("<html>" + title + " " + "<br>ISBN: " + isbn + "</html>");
+                temp.setFont(new Font("Calibri", Font.BOLD, 25));
+                temp.setHorizontalAlignment(SwingConstants.LEFT);
+                temp.setPreferredSize(new Dimension(450, 150));
+                temp.addMouseListener(this);
+                booksPanel.add(temp);
+            }
         }
 
         booksPanel.setLayout(new GridLayout(booksPanel.getComponentCount(), 1));
@@ -1143,12 +1244,16 @@ public class UIManager implements MouseListener, ChangeListener
 
         north.setBorder(BorderFactory.createEmptyBorder(0, 325, 0, 0));
 
-        // TODO: ADD ACTUAL BOOKS
-        // probably want to get rid of this for loop at some point
-        for (int i = 0; i < 10; i++)
+        // reset inventory components for each user so no weird duplicates happen
+        inventoryPanel.removeAll();
+
+        for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
         {
+            String title = currentUser.getBooksBorrowed().get(i).getTitle();
+            String isbn = currentUser.getBooksBorrowed().get(i).getISBN();
+
             JButton temp = new JButton();
-            temp.setText("<html>Book " + i + "<br>Author: Joe</html>");
+            temp.setText("<html>" + title + " " + "<br>ISBN: " + isbn + "</html>");
             temp.setFont(new Font("Calibri", Font.BOLD, 25));
             temp.setHorizontalAlignment(SwingConstants.LEFT);
             temp.setPreferredSize(new Dimension(450, 100));
@@ -1200,12 +1305,15 @@ public class UIManager implements MouseListener, ChangeListener
 
         north.setBorder(BorderFactory.createEmptyBorder(0, 325, 0, 0));
 
-        // TODO: ADD ACTUAL BOOKS
-        // probably want to get rid of this for loop at some point
-        for (int i = 0; i < 5; i++)
+        waitListPanel.removeAll();
+
+        for (int i = 0; i < currentUser.getBooksWaitlisted().size(); i++)
         {
+            String title = currentUser.getBooksWaitlisted().get(i).getTitle();
+            String isbn = currentUser.getBooksWaitlisted().get(i).getISBN();
+
             JButton temp = new JButton();
-            temp.setText("<html>Book " + i + "<br>Author: Jill</html>");
+            temp.setText("<html>" + title + " " + "<br>ISBN: " + isbn + "</html>");
             temp.setFont(new Font("Calibri", Font.BOLD, 25));
             temp.setHorizontalAlignment(SwingConstants.LEFT);
             temp.setPreferredSize(new Dimension(450, 100));
