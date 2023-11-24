@@ -1,19 +1,22 @@
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.*;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.EventObject;
-import java.util.Random;
-import java.util.Scanner;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class UIManager implements MouseListener
+public class UIManager implements MouseListener, ChangeListener
 {
     private JFrame frame;
     JFrame displayBookFrame;
@@ -28,7 +31,10 @@ public class UIManager implements MouseListener
     private JButton closeBookInfoButton;
     private JButton borrowBookButton;
     private JButton waitListBookButton;
+    private JButton resetDateButton;
+    private JButton dateModifyButton;
     private JTextField usernameSignUp;
+    private JTextField enterDays;
     private JPasswordField passwordSignUp;
     private JTextField usernameLogin;
     private JPasswordField passwordLogin;
@@ -45,6 +51,7 @@ public class UIManager implements MouseListener
     private JPanel waitListPanel;
     private JPanel accountPanel;
     private JPanel feePanel;
+    private JPanel dateModifyPanel;
     private JPanel bookInfoButtonPanel;
     private JScrollPane scrollPane;
     private JScrollPane inventoryOfBooks;
@@ -63,9 +70,13 @@ public class UIManager implements MouseListener
     private JLabel bookAuthorText;
     private JLabel bookISBNText;
     private JLabel bookAvailabilityText;
+    private JLabel currentDateText;
+    private JLabel modifyDateText;
+    private JSpinner incrementDatesSpinner;
     private final Color RED = new Color(216, 80, 77);
     private final Color DEFAULT_COLOR = new JButton().getBackground();
     private final int DEFAULT_TIMEOUT_TIME = ToolTipManager.sharedInstance().getDismissDelay();
+    private final String TODAY = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
     private ArrayList<User> users;
     private User currentUser;
     private ArrayList<String> listOfErrors;
@@ -167,11 +178,21 @@ public class UIManager implements MouseListener
 
         if (e.getSource() == signUpButton)
         {
+            hideCurrentScreen();
+
             createSignUp();
         }
         else if (e.getSource() == loginButton)
         {
+            hideCurrentScreen();
+
             createLogin();
+        }
+        else if (e.getSource() == dateModifyButton)
+        {
+            hideCurrentScreen();
+
+            createDateScreen();
         }
 
         if (e.getSource() == returnButton)
@@ -194,17 +215,14 @@ public class UIManager implements MouseListener
             {
                 createAccountScreen();
             }
+            else if (currentScreen.equals("dateScreen"))
+            {
+                createMain();
+            }
         }
 
         if (e.getSource() == submitButton)
         {
-            /*
-            if (!currentScreen.equals("signUp") && !currentScreen.equals("login"))
-            {
-                hideCurrentScreen();
-            }
-             */
-
             if (currentScreen.equals("signUp"))
             {
                 try {
@@ -282,6 +300,12 @@ public class UIManager implements MouseListener
         else if (currentScreen.equals("waitlistedBooksScreen"))
         {
             createBookInfoScreen(waitListPanel, e);
+        }
+
+        if (e.getSource() == resetDateButton)
+        {
+            currentDateText.setText("Current Date: " + TODAY);
+            incrementDatesSpinner.setValue(0); // autoboxing from primitive int -> Integer
         }
 
         System.out.println(currentScreen);
@@ -429,6 +453,12 @@ public class UIManager implements MouseListener
         borrowBookButton = new JButton();
         waitListBookButton = new JButton();
         bookInfoButtonPanel = new JPanel();
+        dateModifyButton = new JButton();
+        currentDateText = new JLabel();
+        modifyDateText = new JLabel();
+        enterDays = new JTextField();
+        dateModifyPanel = new JPanel();
+        resetDateButton = new JButton();
 
         frame.setSize(1000, 650);
         frame.setTitle("Tully Library");
@@ -451,6 +481,12 @@ public class UIManager implements MouseListener
         accountPanel.setBackground(frame.getContentPane().getBackground());
         feePanel.setBackground(frame.getContentPane().getBackground());
         bookInfoButtonPanel.setBackground(frame.getContentPane().getBackground());
+        dateModifyPanel.setBackground(frame.getContentPane().getBackground());
+
+        incrementDatesSpinner = new JSpinner();
+        incrementDatesSpinner.setVisible(false);
+        incrementDatesSpinner.addChangeListener(this);
+        incrementDatesSpinner.setPreferredSize(new Dimension(50, 30));
 
         welcomeText = new JLabel();
         welcomeText.setText("Tully Library");
@@ -512,6 +548,20 @@ public class UIManager implements MouseListener
         bookNameText.setOpaque(false);
         bookNameText.setVisible(true);
 
+        currentDateText = new JLabel();
+        currentDateText.setText("Current Date: " + TODAY);
+        currentDateText.setFont(new Font("Arial", Font.BOLD, 30));
+        currentDateText.setPreferredSize(new Dimension(375, 50));
+        currentDateText.setOpaque(false);
+        currentDateText.setVisible(true);
+
+        modifyDateText = new JLabel();
+        modifyDateText.setText("Modify the current date by x days from now: ");
+        modifyDateText.setFont(new Font("Arial", Font.BOLD, 30));
+        modifyDateText.setPreferredSize(new Dimension(650, 50));
+        modifyDateText.setOpaque(false);
+        modifyDateText.setVisible(true);
+
         bookAuthorText = new JLabel();
         bookAuthorText.setFont(new Font("Arial", Font.BOLD, 20));
         bookAuthorText.setPreferredSize(new Dimension(850, 50));
@@ -566,6 +616,20 @@ public class UIManager implements MouseListener
         submitButton.setFont(new Font("Arial", Font.BOLD, 40));
         submitButton.setVisible(false);
         submitButton.addMouseListener(this);
+
+        resetDateButton.setText("Reset Date");
+        resetDateButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        resetDateButton.setPreferredSize(new Dimension(250, 100));
+        resetDateButton.setFont(new Font("Arial", Font.BOLD, 40));
+        resetDateButton.setVisible(false);
+        resetDateButton.addMouseListener(this);
+
+        dateModifyButton.setText("Modify The Date");
+        dateModifyButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        dateModifyButton.setPreferredSize(new Dimension(400, 100));
+        dateModifyButton.setFont(new Font("Arial", Font.BOLD, 40));
+        dateModifyButton.setVisible(false);
+        dateModifyButton.addMouseListener(this);
 
         accountButton.setText("Account");
         accountButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
@@ -696,10 +760,12 @@ public class UIManager implements MouseListener
         north.add(welcomeText);
         center.add(signUpButton);
         center.add(loginButton);
+        south.add(dateModifyButton);
 
         welcomeText.setVisible(true);
         signUpButton.setVisible(true);
         loginButton.setVisible(true);
+        dateModifyButton.setVisible(true);
 
         // makes it so the components "flow" like text
         // the flow can be customized to be focused on the left, center, etc
@@ -713,7 +779,7 @@ public class UIManager implements MouseListener
         // pushes north & center certain distances
         // helps make screen look a little nicer
         north.setBorder(BorderFactory.createEmptyBorder(0, 300, 150, 0));
-        center.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
+        center.setBorder(null);
     }
 
     // creates the signup screen
@@ -730,8 +796,6 @@ public class UIManager implements MouseListener
         passwordSignUp.setForeground(Color.GRAY);
         passwordSignUp.setEditable(false);
 
-        signUpButton.setVisible(false);
-        loginButton.setVisible(false);
         signUpPanel.setVisible(true);
         returnButton.setVisible(true);
         submitButton.setVisible(true);
@@ -1282,8 +1346,6 @@ public class UIManager implements MouseListener
         returnButton.setVisible(true);
         submitButton.setVisible(true);
         loginPanel.setVisible(true);
-        signUpButton.setVisible(false);
-        loginButton.setVisible(false);
         usernameLogin.setVisible(true);
         passwordLogin.setVisible(true);
         usernameText.setVisible(true);
@@ -1316,11 +1378,56 @@ public class UIManager implements MouseListener
         frame.add(east, BorderLayout.EAST);
     }
 
+    // creates screen that allows you to modify the date
+    // to simulate a real library with actual servers
+    // but we don't have servers in this application
+    public void createDateScreen()
+    {
+        currentScreen = "dateScreen";
+
+        center.add(dateModifyPanel);
+        dateModifyPanel.add(modifyDateText);
+        dateModifyPanel.add(incrementDatesSpinner);
+        center.add(currentDateText);
+
+        dateModifyPanel.setVisible(true);
+        modifyDateText.setVisible(true);
+        incrementDatesSpinner.setVisible(true);
+        currentDateText.setVisible(true);
+        returnButton.setVisible(true);
+        resetDateButton.setVisible(true);
+
+        // remove so that the buttons can be put in order of:
+        // resetDateButton first, then returnButton second
+        south.remove(resetDateButton);
+        south.remove(returnButton);
+
+        south.add(resetDateButton);
+        south.add(returnButton);
+
+        // allows to modify the spinner's properties
+        SpinnerNumberModel model = new SpinnerNumberModel();
+        model.setMinimum(0);
+
+        incrementDatesSpinner.setModel(model);
+
+        // don't need new layout for center
+        // since screen is not resizable
+        // so anything that goes offscreen automatically stuck to the "next line"
+        // if screen was wider, the whole thing would look like a straight line
+    }
+
     // hides the current screen right before transitioning to another screen
     // the transition is not part of this
     // but all the "create" methods
     public void hideCurrentScreen()
     {
+        if (currentScreen.equals("main"))
+        {
+            signUpButton.setVisible(false);
+            loginButton.setVisible(false);
+            dateModifyButton.setVisible(false);
+        }
         if (currentScreen.equals("signUp"))
         {
             west.setBorder(null);
@@ -1397,6 +1504,15 @@ public class UIManager implements MouseListener
         {
             waitListedBooks.setVisible(false);
             waitlistText.setVisible(false);
+        }
+        else if (currentScreen.equals("dateScreen"))
+        {
+            dateModifyPanel.setVisible(false);
+            modifyDateText.setVisible(false);
+            incrementDatesSpinner.setVisible(false);
+            currentDateText.setVisible(false);
+            returnButton.setVisible(false);
+            resetDateButton.setVisible(false);
         }
     }
 
@@ -1557,6 +1673,16 @@ public class UIManager implements MouseListener
             waitListBookButton.setBackground(RED);
         }
 
+        if (e.getSource() == dateModifyButton)
+        {
+            dateModifyButton.setBackground(RED);
+        }
+
+        if (e.getSource() == resetDateButton)
+        {
+            resetDateButton.setBackground(RED);
+        }
+
         // show tooltip/hint for password
         if (e.getSource() == passwordCheckBox)
         {
@@ -1642,10 +1768,30 @@ public class UIManager implements MouseListener
             waitListBookButton.setBackground(DEFAULT_COLOR);
         }
 
+        if (e.getSource() == dateModifyButton)
+        {
+            dateModifyButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == resetDateButton)
+        {
+            resetDateButton.setBackground(DEFAULT_COLOR);
+        }
+
         if (e.getSource() == passwordCheckBox)
         {
             passwordCheckBox.setBackground(new Color(73, 84, 114));
             ToolTipManager.sharedInstance().setDismissDelay(DEFAULT_TIMEOUT_TIME);
+        }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e)
+    {
+        if (e.getSource() == incrementDatesSpinner)
+        {
+            String newDate = LocalDate.parse(TODAY).plusDays((Integer) incrementDatesSpinner.getValue()).toString();
+            currentDateText.setText("Current Date: " + newDate);
         }
     }
 }
