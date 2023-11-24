@@ -1,12 +1,12 @@
 Tester,NotPass@2,34341212
-Harry Potter and the Sorcerer's Stone,J.K. Rowling,1338878921,2023-11-28;The Maze Runner (Book 1),James Dashner,9780385737951,2023-11-30
+Harry Potter and the Sorcerer's Stone,J.K. Rowling,1338878921,2023-11-28;The Maze Runner (Tully.Book 1),James Dashner,9780385737951,2023-11-30
 To Kill a Mockingbird,Harper Lee,0446310786;Lord of the Flies,William Golding,0399501487
 NoBooks,Wh@tpass1,34341213
 
 
-BorrowedBooks,Password$4,34341214
+BorrowBooks,Password$4,34341214
 1984,George Orwell,9780451524935,2023-11-29
 
-HasWaitlistedBooks,waitl1$T,34341215
+WaitlistBooks,waitl1$T,34341215
 
 Fahrenheit 451,Ray Bradbury,9781451673319
