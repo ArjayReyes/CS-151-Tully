@@ -1,3 +1,5 @@
+package Tully;
+
 import java.util.ArrayList;
 //RAAAAAAAAAAAAAAAAAAh
 public class User {
@@ -64,7 +66,7 @@ public class User {
 		this.booksWaitlisted = booksWaitlisted;
 	}
 
-	// Added an equals method within Book class.
+	// Added an equals method within Tully.Book class.
 	public boolean hasBook(String book) {//add a method in book to compare the contents
 		if (booksBorrowed.contains(book)) {
 			//System.out.println("yea");
@@ -74,7 +76,7 @@ public class User {
 		return false;
 	}
 
-	//make it so it checks the date from Library and compares to the return Date of Book.
+	//make it so it checks the date from Tully.Library and compares to the return Date of Tully.Book.
 	public boolean isOverdue(String book) {
 		//first statement checks if you even have the book
 //		if (hasBook(book)) {
