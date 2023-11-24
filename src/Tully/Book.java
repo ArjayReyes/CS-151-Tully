@@ -1,3 +1,5 @@
+package Tully;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -8,6 +10,15 @@ public class Book {
     private boolean isBorrowed = false;
     private boolean isWaitlisted = false;
     private LocalDate returnDate;   // to set a date use LocalDate.of(Year,Month,Day)
+
+    public Book() {
+        this.title = "";
+        this.author = "";
+        this.ISBN = "";
+        this.isBorrowed = false;
+        this.isWaitlisted = false;
+        this.returnDate = LocalDate.of(2025,1,1);
+    }
 
     // constructor for book with no return date; default is January 1st, 2000
     public Book(String title, String author, String ISBN) {
@@ -109,7 +120,8 @@ public class Book {
         return  "Title: " + title +
                 "\nAuthor: " + author +
                 "\nISBN: " + ISBN +
-                "\nBook being used?: " + isBorrowed +
+                "\nIs book being borrowed?: " + isBorrowed +
+                "\nIs book currently waitlisted?: " + isWaitlisted +
                 "\nReturn Date: " + returnDate;
     }
 }
