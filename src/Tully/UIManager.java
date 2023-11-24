@@ -1,3 +1,5 @@
+package Tully;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -6,15 +8,17 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.*;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static Tully.Library.loadBookDatabase;
+import static Tully.Library.loadUserDatabase;
 
 public class UIManager implements MouseListener, ChangeListener
 {
@@ -79,6 +83,7 @@ public class UIManager implements MouseListener, ChangeListener
     private final String TODAY = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
     private String currentDate = TODAY;
     private ArrayList<User> users;
+    private ArrayList<Book> books;
     private User currentUser;
     private ArrayList<String> listOfErrors;
 
@@ -88,73 +93,15 @@ public class UIManager implements MouseListener, ChangeListener
 
     public UIManager() throws FileNotFoundException, ParseException {
         users = new ArrayList<User>();
+        books = new ArrayList<Book>();
 
         // File I/O method for Users
         loadUserDatabase(users);
+        loadBookDatabase(books);
 
         // probably have to create Library instance here maybe
 
         initialize();
-    }
-
-    public void loadUserDatabase(ArrayList<User> users) throws FileNotFoundException, ParseException {
-        File userFile = new File("userDatabase.txt");
-        Scanner sc = new Scanner(userFile);
-        int count = 1;
-
-        while (sc.hasNext()) {
-            User fileUser = new User();
-            // checks 'first' line which should have username, password, and libraryID
-            if (count == 1) {
-                String line = sc.nextLine();
-                String[] userInfo = line.split(",");
-                fileUser.setName(userInfo[0]);
-                fileUser.setPassword(userInfo[1]);
-                fileUser.setLibraryID(Integer.parseInt(userInfo[2]));
-                count++;
-            }
-
-            // next line for borrowedBooks
-            else if (count == 2) {
-                String line = sc.nextLine();
-                ArrayList<Book> booksBorrowed = new ArrayList<Book>();
-                fileUser.setBooksWaitlisted(booksBorrowed);
-                if (!(line.isBlank())) {
-                    String[] borrowedBooksInfo = line.split(";");
-                    String[] bookInfo;
-                    for (String borrowedBooks : borrowedBooksInfo) {
-                        // This splits book information and add to user's borrowed books.
-                        bookInfo = borrowedBooks.split(",");
-                        // utilizes returnDate constructor
-                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], LocalDate.parse(bookInfo[3]));
-                        booksBorrowed.add(book);
-                    }
-                    fileUser.setBooksBorrowed(booksBorrowed);
-                }
-                fileUser.setBooksWaitlisted(booksBorrowed);
-                count++;
-            }
-
-            else if (count == 3) {
-                String line = sc.nextLine();
-                ArrayList<Book> booksWaitlisted = new ArrayList<Book>();
-                fileUser.setBooksWaitlisted(booksWaitlisted);
-                if (!(line.isBlank())) {
-                    String[] waitlistedBooksInfo = line.split(";");
-                    String[] bookInfo;
-                    for (String waitlistedBooks : waitlistedBooksInfo) {
-                        bookInfo = waitlistedBooks.split(",");
-                        // utilizes non-returnDate constructor and is set as waitlisted
-                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2]);
-                        book.setIsWaitlisted(true);
-                        booksWaitlisted.add(book);
-                    }
-                    fileUser.setBooksWaitlisted(booksWaitlisted);
-                }
-                count = 1;
-            }
-            users.add(fileUser);
-        }
     }
 
     public String getCurrentScreen()
