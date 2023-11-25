@@ -1,3 +1,5 @@
+package Tully;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -96,6 +98,7 @@ public class UIManager implements MouseListener, ChangeListener
         // File I/O method for Users
         Library.loadUserDatabase(users);
         Library.loadBookDatabase(books);
+        Library.checkWaitlists(books, users);
 
         // probably have to create Library instance here maybe
 
@@ -411,7 +414,7 @@ public class UIManager implements MouseListener, ChangeListener
                 bookNameText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookAvailabilityText.setVisible(true);
-                if (tempBook.getIsWaitlisted())
+                if (tempBook.getIsWaitlisted() || tempBook.getIsBorrowed())
                 {
                     bookAvailabilityText.setText("Availability: In Use");
                 }
