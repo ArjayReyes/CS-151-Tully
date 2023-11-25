@@ -22,6 +22,33 @@ public class Library
         this.books = books;
     }
 
+    public static void checkWaitlists(ArrayList<Book> books, ArrayList<User> users) {
+        for (Book book : books) {
+            for (User user : users) {
+                ArrayList<Book> userWaitlist = user.getBooksWaitlisted();
+                for (Book value : userWaitlist) {
+                    if (book.equals(value)) {
+                        book.setIsWaitlisted(true);
+                    }
+                }
+            }
+        }
+    }
+
+    // Unused check. Made this just in case the setReturnDate fails.
+    public static void checkAvailability(ArrayList<Book> books, ArrayList<User> users) {
+        for (Book book : books) {
+            for (User user : users) {
+                ArrayList<Book> userBooks = user.getBooksBorrowed();
+                for (Book value : userBooks) {
+                    if (book.equals(value)) {
+                        book.setBorrowed(true);
+                    }
+                }
+            }
+        }
+    }
+
     // Method reads book info from bookDatabase.txt to an ArrayList<Tully.Book>
     // Reads: title, author, ISBN, returnDate
     // Does NOT update waitListed
@@ -41,7 +68,6 @@ public class Library
             if (!(returnDate.isBlank())) {
                 book.setReturnDate(LocalDate.parse(returnDate));
             }
-            //System.out.println(book);
             books.add(book);
             System.out.println(book);
         }
@@ -95,7 +121,6 @@ public class Library
                 user.setBooksWaitlisted(booksWaitlisted);
             }
             users.add(user);
-            System.out.println(user);
         }
     }
 
