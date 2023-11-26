@@ -48,13 +48,13 @@ public class Library
         }
     }
 
-    // append updated user books to userDatabase
+    // Method updates user books in userDatabase.txt
     // update user directly before calling this method!
     // can be looped for entire database if needed
     // code from: https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file
-    public static void updateBooks(User user) {
+    public static void updateUserBooks(User user) {
         try {
-            BufferedReader file = new BufferedReader(new FileReader("users.txt"));
+            BufferedReader file = new BufferedReader(new FileReader("userDatabase.txt"));
             StringBuilder input = new StringBuilder();
             String line;
 
@@ -97,7 +97,42 @@ public class Library
             file.close();
 
             // write the new string with the replaced line OVER the same file
-            FileOutputStream fileOut = new FileOutputStream("users.txt");
+            FileOutputStream fileOut = new FileOutputStream("userDatabase.txt");
+            fileOut.write(input.toString().getBytes());
+            fileOut.close();
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+
+    // Method to update book return dates.
+    // Can be looped through entire database if needed.
+    // code from: https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file
+    public static void updateBookDate(Book book) {
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("bookDatabase.txt"));
+            StringBuilder input = new StringBuilder();
+            String line;
+            while ((line = file.readLine()) != null) {
+                input.append(line);
+                if (line.contains(book.getTitle())) {
+                    line = file.readLine();
+                    input.append('\n').append(line);
+                    line = file.readLine();
+                    input.append('\n').append(line);
+                    file.readLine();
+                    input.append('\n');
+                    if (!(book.getReturnDate().equals(LocalDate.of(2025,1,1)))) {
+                        input.append(book.getReturnDate().toString());
+                    }
+                }
+                input.append('\n');
+            }
+            file.close();
+
+            // write the new string with the replaced line OVER the same file
+            FileOutputStream fileOut = new FileOutputStream("bookDatabase.txt");
             fileOut.write(input.toString().getBytes());
             fileOut.close();
 
@@ -108,8 +143,7 @@ public class Library
 
     // Method reads book info from bookDatabase.txt to an ArrayList<Tully.Book>
     // Reads: title, author, ISBN, returnDate
-    // Does NOT update waitListed
-    // TODO: create a separate method that reads ArrayList<Tully.User> and updates books
+    // Waitlist is updated through checkWaitlist
     public static void loadBookDatabase(ArrayList<Book> books) throws FileNotFoundException {
         File bookFile = new File("bookDatabase.txt");
         Scanner sc = new Scanner(bookFile);
