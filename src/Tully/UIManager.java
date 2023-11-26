@@ -1,5 +1,3 @@
-package Tully;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -34,6 +32,8 @@ public class UIManager implements MouseListener, ChangeListener
     private JButton waitListBookButton;
     private JButton resetDateButton;
     private JButton dateModifyButton;
+    private JButton returnBookButton;
+    private JButton extendBookButton;
     private JTextField usernameSignUp;
     private JTextField enterDays;
     private JPasswordField passwordSignUp;
@@ -73,6 +73,7 @@ public class UIManager implements MouseListener, ChangeListener
     private JLabel bookAvailabilityText;
     private JLabel currentDateText;
     private JLabel modifyDateText;
+    private JLabel dueDateText;
     private JSpinner incrementDatesSpinner;
     private final Color RED = new Color(216, 80, 77);
     private final Color DEFAULT_COLOR = new JButton().getBackground();
@@ -86,6 +87,7 @@ public class UIManager implements MouseListener, ChangeListener
     // to keep track of the current book selected
     // so that there is no need for more loops/checking what book has been selected
     private Book currentBookSelected;
+    private JButton currentBookButtonPressed;
 
     public static void main(String[] args) throws FileNotFoundException, ParseException {
         UIManager test = new UIManager();
@@ -266,6 +268,16 @@ public class UIManager implements MouseListener, ChangeListener
             else if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksBorrowed()))
             {
                 currentUser.getBooksBorrowed().add(currentBookSelected);
+
+                // able to borrow book means its available
+                // so no need for it to be waitlisted
+                if (currentBookSelected.getIsWaitlisted())
+                {
+                    currentUser.getBooksWaitlisted().remove(currentBookSelected);
+
+                    waitListPanel.remove(currentBookButtonPressed);
+                }
+
                 JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
@@ -285,6 +297,23 @@ public class UIManager implements MouseListener, ChangeListener
                 JOptionPane.showMessageDialog(frame, "You have already waitlisted " + currentBookSelected.getTitle());
             }
         }
+        else if (e.getSource() == returnBookButton)
+        {
+            inventoryPanel.remove(currentBookButtonPressed);
+
+            currentUser.getBooksBorrowed().remove(currentBookSelected);
+
+            JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " returned");
+        }
+        else if (e.getSource() == extendBookButton)
+        {
+            currentBookSelected.setReturnDate(currentBookSelected.getReturnDate().plusYears(1));
+
+            JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
+        }
+
+        frame.repaint();
+        frame.validate();
 
         System.out.println(currentScreen);
     }
@@ -350,37 +379,22 @@ public class UIManager implements MouseListener, ChangeListener
     // displays the book's information after a button representing the book is pressed
     public void createBookInfoScreen(JPanel someBookPanel, MouseEvent e, ArrayList<Book> checkMe)
     {
-        JButton tempMouse = (JButton) e.getSource();
+        JButton temp = findBook(someBookPanel, e);
 
-        for (int i = 0; i < someBookPanel.getComponentCount(); i++)
+        // since this method is called each time a button is pressed on the necessary screen
+        if (temp != null)
         {
-            JButton temp = (JButton) someBookPanel.getComponent(i);
+            Book tempBook = findBook(temp, checkMe);
 
-            // matches the same book buttons
-            // if it matches, create the info screen
-            if (tempMouse != null && tempMouse == someBookPanel.getComponent(i))
+            if (tempBook != null)
             {
-                // since button follows the book's arraylist,
-                // the buttons must be in the same order as the books
-                Book tempBook = findBook(temp, checkMe);
-
                 displayBookFrame = new JFrame(); // lazy way to "reset" the frame without hiding all the components
-                displayBookFrame.setLayout(new GridLayout(5, 1));
                 displayBookFrame.setSize(900, 500);
                 displayBookFrame.setTitle(tempBook.getTitle());
                 displayBookFrame.getContentPane().setBackground(new Color(121, 156, 185));
                 displayBookFrame.setResizable(false);
                 displayBookFrame.setLocationRelativeTo(null);
                 displayBookFrame.setVisible(true);
-
-                displayBookFrame.add(bookNameText);
-                displayBookFrame.add(bookAuthorText);
-                displayBookFrame.add(bookISBNText);
-                displayBookFrame.add(bookAvailabilityText);
-                displayBookFrame.add(bookInfoButtonPanel);
-                bookInfoButtonPanel.add(borrowBookButton);
-                bookInfoButtonPanel.add(waitListBookButton);
-                bookInfoButtonPanel.add(closeBookInfoButton);
 
                 closeBookInfoButton.setVisible(true);
                 if (currentScreen.equals("bookScreen"))
@@ -399,6 +413,25 @@ public class UIManager implements MouseListener, ChangeListener
                     borrowBookButton.setVisible(false);
                     waitListBookButton.setVisible(false);
                 }
+
+                if (currentScreen.equals("inventoryScreen"))
+                {
+                    returnBookButton.setVisible(true);
+                    extendBookButton.setVisible(true);
+                    dueDateText.setVisible(true);
+
+                    displayBookFrame.add(dueDateText);
+                }
+                else
+                {
+                    returnBookButton.setVisible(false);
+                    extendBookButton.setVisible(false);
+
+                    displayBookFrame.remove(dueDateText);
+                }
+
+                dueDateText.setText("Due Date: " + tempBook.getReturnDate());
+                dueDateText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookAuthorText.setVisible(true);
                 bookAuthorText.setText("Author: " + tempBook.getAuthor());
@@ -424,13 +457,29 @@ public class UIManager implements MouseListener, ChangeListener
                 }
                 bookAvailabilityText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
+                displayBookFrame.add(bookNameText);
+                displayBookFrame.add(bookAuthorText);
+                displayBookFrame.add(bookISBNText);
+                displayBookFrame.add(bookAvailabilityText);
+                displayBookFrame.add(bookInfoButtonPanel);
+                bookInfoButtonPanel.add(borrowBookButton);
+                bookInfoButtonPanel.add(waitListBookButton);
+                bookInfoButtonPanel.add(returnBookButton);
+                bookInfoButtonPanel.add(extendBookButton);
+                bookInfoButtonPanel.add(closeBookInfoButton);
+
+                // getContentPane since JFrame has a content pane to display content
+                // components put into that content pane instead of the actual frame
+                displayBookFrame.setLayout(new GridLayout(displayBookFrame.getContentPane().getComponentCount(), 1));
+
                 borrowBookButton.setBackground(DEFAULT_COLOR);
                 waitListBookButton.setBackground(DEFAULT_COLOR);
                 closeBookInfoButton.setBackground(DEFAULT_COLOR);
+                returnBookButton.setBackground(DEFAULT_COLOR);
+                extendBookButton.setBackground(DEFAULT_COLOR);
 
                 currentBookSelected = tempBook;
-
-                break;
+                currentBookButtonPressed = temp;
             }
         }
     }
@@ -441,6 +490,9 @@ public class UIManager implements MouseListener, ChangeListener
         String temp = getJButtonTextWithoutHTML(button);
 
         int ISBNIndex = temp.indexOf("ISBN: ");
+
+        //System.out.println(temp.substring(ISBNIndex + "ISBN: ".length()));
+        //System.out.println("current: " + currentBookSelected.getISBN());
 
         // add "ISBN: ".length() to get end index of the "ISBN: " string
         // so that only the ISBN is returned
@@ -463,6 +515,27 @@ public class UIManager implements MouseListener, ChangeListener
         }
 
         return returnMe;
+    }
+
+    // finds the JButton that was pressed
+    // returns JButton if found, null if not found
+    public JButton findBook(JPanel bookPanel, MouseEvent e)
+    {
+        JButton tempMouse = (JButton) e.getSource();
+
+        for (int i = 0; i < bookPanel.getComponentCount(); i++)
+        {
+            JButton temp = (JButton) bookPanel.getComponent(i);
+
+            // matches the same book buttons
+            // if it matches, create the info screen
+            if (tempMouse != null && tempMouse == temp)
+            {
+                return temp;
+            }
+        }
+
+        return null;
     }
 
     // initialize all instance variables
@@ -509,6 +582,8 @@ public class UIManager implements MouseListener, ChangeListener
         enterDays = new JTextField();
         dateModifyPanel = new JPanel();
         resetDateButton = new JButton();
+        returnBookButton = new JButton();
+        extendBookButton = new JButton();
 
         frame.setSize(1000, 650);
         frame.setTitle("Tully Library");
@@ -630,6 +705,12 @@ public class UIManager implements MouseListener, ChangeListener
         bookAvailabilityText.setOpaque(false);
         bookAvailabilityText.setVisible(true);
 
+        dueDateText = new JLabel();
+        dueDateText.setFont(new Font("Arial", Font.BOLD, 20));
+        dueDateText.setPreferredSize(new Dimension(850, 50));
+        dueDateText.setOpaque(false);
+        dueDateText.setVisible(true);
+
         currentFees = new JLabel();
         currentFees.setFont(new Font("Arial", Font.BOLD, 40));
         currentFees.setPreferredSize(new Dimension(950, 75));
@@ -729,6 +810,20 @@ public class UIManager implements MouseListener, ChangeListener
         waitListBookButton.setFont(new Font("Arial", Font.BOLD, 20));
         waitListBookButton.setVisible(false);
         waitListBookButton.addMouseListener(this);
+
+        returnBookButton.setText("Return");
+        returnBookButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        returnBookButton.setPreferredSize(new Dimension(150, 50));
+        returnBookButton.setFont(new Font("Arial", Font.BOLD, 20));
+        returnBookButton.setVisible(false);
+        returnBookButton.addMouseListener(this);
+
+        extendBookButton.setText("Extend");
+        extendBookButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        extendBookButton.setPreferredSize(new Dimension(150, 50));
+        extendBookButton.setFont(new Font("Arial", Font.BOLD, 20));
+        extendBookButton.setVisible(false);
+        extendBookButton.addMouseListener(this);
 
         usernameSignUp.setFont(new Font("Arial", Font.BOLD, 40));
         usernameSignUp.setPreferredSize(new Dimension(600, 100));
@@ -1075,7 +1170,7 @@ public class UIManager implements MouseListener, ChangeListener
                 out.newLine();
                 out.close();
             }
-            User u = new User(usertxt, pass, userId, new ArrayList<Book>(), new ArrayList<Book>());
+            User u = new User(usertxt, pass, userId, new ArrayList<Book>(), new ArrayList<Book>(), 0);
             users.add(u);
 
             return true;
@@ -1182,9 +1277,19 @@ public class UIManager implements MouseListener, ChangeListener
         welcomeUserText.setVisible(true);
         welcomeUserText.setHorizontalTextPosition(SwingConstants.LEFT);
 
-        // TODO: ADD ACTUAL FEES
         currentFees.setVisible(true);
-        currentFees.setText("Fees: " + "999" + "$");
+
+        for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
+        {
+            LocalDate current = LocalDate.parse(currentDate);
+
+            if (currentUser.getBooksBorrowed().get(i).getReturnDate().isBefore(current))
+            {
+                currentUser.setFees(currentUser.getFees() + 5.25);
+            }
+        }
+
+        currentFees.setText("Fees: " + String.format("%.2f", currentUser.getFees()) + "$");
 
         north.setVisible(true);
         payFeesButton.setVisible(true);
@@ -1743,6 +1848,16 @@ public class UIManager implements MouseListener, ChangeListener
             resetDateButton.setBackground(RED);
         }
 
+        if (e.getSource() == returnBookButton)
+        {
+            returnBookButton.setBackground(RED);
+        }
+
+        if (e.getSource() == extendBookButton)
+        {
+            extendBookButton.setBackground(RED);
+        }
+
         // show tooltip/hint for password
         if (e.getSource() == passwordCheckBox)
         {
@@ -1836,6 +1951,16 @@ public class UIManager implements MouseListener, ChangeListener
         if (e.getSource() == resetDateButton)
         {
             resetDateButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == returnBookButton)
+        {
+            returnBookButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == extendBookButton)
+        {
+            extendBookButton.setBackground(DEFAULT_COLOR);
         }
 
         if (e.getSource() == passwordCheckBox)

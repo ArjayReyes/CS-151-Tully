@@ -1,5 +1,3 @@
-package Tully;
-
 import java.util.ArrayList;
 //RAAAAAAAAAAAAAAAAAAh
 public class User {
@@ -8,6 +6,7 @@ public class User {
 	private int libraryID;
 	private ArrayList<Book> booksBorrowed;//change to be generalized as books
 	private ArrayList<Book> booksWaitlisted;
+	private double fees;
 
 	public User() {
 		this.name = "Joe Biden";
@@ -15,14 +14,16 @@ public class User {
 		this.libraryID = 1919191919;
 		this.booksBorrowed = new ArrayList<Book>();
 		this.booksWaitlisted = new ArrayList<Book>();
+		fees = 0;
 	}
 
-	public User(String n, String p, int id, ArrayList<Book> ar, ArrayList<Book> ar2) {
+	public User(String n, String p, int id, ArrayList<Book> ar, ArrayList<Book> ar2, double fees) {
 		this.name = n;
 		this.password = p;
 		this.libraryID = id;
 		this.booksBorrowed = ar;
 		this.booksWaitlisted = ar2;
+		this.fees = fees;
 	}
 
 	public void setName(String name) {
@@ -64,6 +65,14 @@ public class User {
 
 	public void setBooksWaitlisted(ArrayList<Book> booksWaitlisted) {
 		this.booksWaitlisted = booksWaitlisted;
+	}
+
+	public double getFees() {
+		return fees;
+	}
+
+	public void setFees(double fees) {
+		this.fees = fees;
 	}
 
 	// Added an equals method within Tully.Book class.
