@@ -215,7 +215,16 @@ public class UIManager implements MouseListener, ChangeListener
 
         if (e.getSource() == payFeesButton)
         {
-            // TODO: Pay the fee
+            // if has any overdue books
+            if (checkOverdueBooks())
+            {
+                JOptionPane.showMessageDialog(frame, "You need to return any overdue books before you can pay your fees!");
+            }
+            else
+            {
+                currentUser.setFees(currentUser.getFees());
+                currentFees.setText("Fees: " + String.format("%.2f", currentUser.getFees()) + "$");
+            }
         }
 
         if (e.getSource() == bookInventoryButton)
@@ -341,6 +350,22 @@ public class UIManager implements MouseListener, ChangeListener
 
     @Override
     public void mouseClicked(MouseEvent e) {}
+
+    // checks if the user has any overdue books
+    public boolean checkOverdueBooks()
+    {
+        for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
+        {
+            LocalDate current = LocalDate.parse(currentDate);
+
+            if (currentUser.getBooksBorrowed().get(i).getReturnDate().isBefore(current))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // checks if there is a duplicate book in checkMe
     // assuming that all ISBN's are unique
