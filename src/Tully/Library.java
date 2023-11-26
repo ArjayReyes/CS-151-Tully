@@ -1,7 +1,6 @@
 package Tully;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,6 +48,64 @@ public class Library
         }
     }
 
+    // append updated user books to userDatabase
+    // update user directly before calling this method!
+    // can be looped for entire database if needed
+    // code from: https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file
+    public static void updateBooks(User user) {
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("users.txt"));
+            StringBuilder input = new StringBuilder();
+            String line;
+
+            while ((line = file.readLine()) != null) {
+                input.append(line);
+                if(line.contains(user.getName() + "," + user.getPassword() + "," + user.getId())) {
+                    file.readLine();
+                    ArrayList<Book> updatedBooks = new ArrayList<Book>(user.getBooksBorrowed());
+                    StringBuilder line2 = new StringBuilder();
+
+                    // enhanced for loop for books borrowed
+                    for (int i = 0; i < updatedBooks.size(); i++) {
+                        Book book = updatedBooks.get(i);
+                        line2.append(book.getTitle()).append(',').append(book.getAuthor()).append(',').append(book.getISBN());
+                        if (!(book.getReturnDate() == LocalDate.of(2025, 1, 1))) {
+                            line2.append(',').append(book.getReturnDate().toString());
+                        }
+                        if(!(i == updatedBooks.size()-1)) {
+                            line2.append(';');
+                        }
+                    }
+                    input.append('\n').append(line2);
+
+                    file.readLine();
+                    ArrayList<Book> waitlistBooks = new ArrayList<Book>(user.getBooksWaitlisted());
+                    StringBuilder line3 = new StringBuilder();
+
+                    // enhanced for loop for books waitlisted by user
+                    for (int i = 0; i < waitlistBooks.size(); i++) {
+                        Book book = waitlistBooks.get(i);
+                        line3.append(book.getTitle()).append(',').append(book.getAuthor()).append(',').append(book.getISBN());
+                        if(!(i == waitlistBooks.size()-1)) {
+                            line3.append(';');
+                        }
+                    }
+                    input.append('\n').append(line3);
+                }
+                input.append('\n');
+            }
+            file.close();
+
+            // write the new string with the replaced line OVER the same file
+            FileOutputStream fileOut = new FileOutputStream("users.txt");
+            fileOut.write(input.toString().getBytes());
+            fileOut.close();
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+
     // Method reads book info from bookDatabase.txt to an ArrayList<Tully.Book>
     // Reads: title, author, ISBN, returnDate
     // Does NOT update waitListed
@@ -73,7 +130,7 @@ public class Library
         }
     }
 
-    // This method adds user info from userDatabase.txt to an ArrayList<Tully.User>
+    // This method adds user info from userDatabase.txt to an ArrayList<User>
     // Reads: username, password, info, ArrayList<Books> for borrowed and waitlisted books
     public static void loadUserDatabase(ArrayList<User> users) throws FileNotFoundException {
         File userFile = new File("userDatabase.txt");
