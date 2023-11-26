@@ -1,3 +1,5 @@
+package Tully;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -277,12 +279,14 @@ public class UIManager implements MouseListener, ChangeListener
             else if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksBorrowed()))
             {
                 currentUser.getBooksBorrowed().add(currentBookSelected);
+                Library.updateUserBooks(currentUser);
 
                 // able to borrow book means its available
                 // so no need for it to be waitlisted
                 if (currentBookSelected.getIsWaitlisted())
                 {
                     currentUser.getBooksWaitlisted().remove(currentBookSelected);
+                    Library.updateUserBooks(currentUser);
 
                     waitListPanel.remove(currentBookButtonPressed);
                 }
@@ -299,6 +303,7 @@ public class UIManager implements MouseListener, ChangeListener
             if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksWaitlisted()))
             {
                 currentUser.getBooksWaitlisted().add(currentBookSelected);
+                Library.updateUserBooks(currentUser);
                 JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
@@ -311,12 +316,16 @@ public class UIManager implements MouseListener, ChangeListener
             inventoryPanel.remove(currentBookButtonPressed);
 
             currentUser.getBooksBorrowed().remove(currentBookSelected);
+            currentBookSelected.setReturnDate(LocalDate.of(2025,1,1));
+            Library.updateBookDate(currentBookSelected);
+            Library.updateUserBooks(currentUser);
 
             JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " returned");
         }
         else if (e.getSource() == extendBookButton)
         {
             currentBookSelected.setReturnDate(currentBookSelected.getReturnDate().plusYears(1));
+            Library.updateBookDate(currentBookSelected);
 
             JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
         }
