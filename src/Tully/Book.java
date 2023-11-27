@@ -86,7 +86,6 @@ public class Book {
     // maybe set returnDate to a week (7 days) when book is checked out
     public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
-        this.isBorrowed = true;
     }
 
     // https://stackoverflow.com/questions/8180430/how-to-override-equals-method-in-java
