@@ -1,5 +1,3 @@
-package Tully;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -36,12 +34,21 @@ public class UIManager implements MouseListener, ChangeListener
     private JButton dateModifyButton;
     private JButton returnBookButton;
     private JButton extendBookButton;
+    private JButton removeUserScreenButton;
+    private JButton addBookScreenButton;
+    private JButton removeBookScreenButton;
+    private JButton adminButton;
+    private JButton adminSubmitButton;
     private JTextField usernameSignUp;
     private JTextField enterDays;
     private JPasswordField passwordSignUp;
     private JTextField usernameLogin;
     private JPasswordField passwordLogin;
     private JCheckBox passwordCheckBox;
+    private JTextField removeBookOrUserInput;
+    private JTextField bookTitleInput;
+    private JTextField bookAuthorInput;
+    private JTextField bookISBNInput;
     private JPanel north;
     private JPanel west;
     private JPanel center;
@@ -56,6 +63,8 @@ public class UIManager implements MouseListener, ChangeListener
     private JPanel feePanel;
     private JPanel dateModifyPanel;
     private JPanel bookInfoButtonPanel;
+    private JPanel addBookTextPanel;
+    private JPanel addBookInputPanel;
     private JScrollPane scrollPane;
     private JScrollPane inventoryOfBooks;
     private JScrollPane waitListedBooks;
@@ -76,6 +85,10 @@ public class UIManager implements MouseListener, ChangeListener
     private JLabel currentDateText;
     private JLabel modifyDateText;
     private JLabel dueDateText;
+    private JLabel addBookTitleText;
+    private JLabel addBookAuthorText;
+    private JLabel addBookISBNText;
+    private JLabel removeBookOrUserText;
     private JSpinner incrementDatesSpinner;
     private final Color RED = new Color(216, 80, 77);
     private final Color DEFAULT_COLOR = new JButton().getBackground();
@@ -147,6 +160,12 @@ public class UIManager implements MouseListener, ChangeListener
 
             createDateScreen();
         }
+        else if (e.getSource() == adminButton)
+        {
+            hideCurrentScreen();
+
+            createAdminScreen();
+        }
 
         if (e.getSource() == returnButton)
         {
@@ -168,9 +187,13 @@ public class UIManager implements MouseListener, ChangeListener
             {
                 createAccountScreen();
             }
-            else if (currentScreen.equals("dateScreen"))
+            else if (currentScreen.equals("dateScreen") || currentScreen.equals("adminScreen"))
             {
                 createMain();
+            }
+            else if (currentScreen.equals("addBookScreen") || currentScreen.equals("removeBookScreen") || currentScreen.equals("removeUserScreen"))
+            {
+                createAdminScreen();
             }
         }
 
@@ -289,7 +312,6 @@ public class UIManager implements MouseListener, ChangeListener
                 if (currentBookSelected.getIsWaitlisted())
                 {
                     currentUser.getBooksWaitlisted().remove(currentBookSelected);
-                    Library.updateUserBooks(currentUser);
 
                     waitListPanel.remove(currentBookButtonPressed);
                 }
@@ -306,7 +328,6 @@ public class UIManager implements MouseListener, ChangeListener
             if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksWaitlisted()))
             {
                 currentUser.getBooksWaitlisted().add(currentBookSelected);
-                Library.updateUserBooks(currentUser);
                 JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
@@ -319,9 +340,6 @@ public class UIManager implements MouseListener, ChangeListener
             inventoryPanel.remove(currentBookButtonPressed);
 
             currentUser.getBooksBorrowed().remove(currentBookSelected);
-            currentBookSelected.setReturnDate(LocalDate.of(2025,1,1));
-            Library.updateBookDate(currentBookSelected);
-            Library.updateUserBooks(currentUser);
 
             JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " returned");
         }
@@ -335,10 +353,84 @@ public class UIManager implements MouseListener, ChangeListener
             JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
         }
 
+        if (e.getSource() == addBookScreenButton)
+        {
+            hideCurrentScreen();
+
+            createAddBookScreen();
+        }
+        else if (e.getSource() == removeBookScreenButton)
+        {
+            hideCurrentScreen();
+
+            createRemoveBookScreen();
+        }
+        else if (e.getSource() == removeUserScreenButton)
+        {
+            hideCurrentScreen();
+
+            createRemoveUserScreen();
+        }
+
+        if (e.getSource() == adminSubmitButton)
+        {
+            if (checkAdminSubmitButton())
+            {
+                hideCurrentScreen();
+
+                if (currentScreen.equals("addBookScreen"))
+                {
+                    try
+                    {
+                        Library.addBook(bookTitleInput.getText(), bookAuthorInput.getText(), bookISBNInput.getText(), books);
+                    }
+                    catch (IOException ex)
+                    {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                else if (currentScreen.equals("removeBookScreen"))
+                {
+                    Book removeMe = null;
+
+                    for (int i = 0; i < books.size(); i++)
+                    {
+                        if (books.get(i).getISBN().equals(removeBookOrUserInput.getText().trim()))
+                        {
+                            removeMe = books.get(i);
+                            break;
+                        }
+                    }
+
+                    Library.deleteBook(removeMe, users, books);
+                }
+                else if (currentScreen.equals("removeUserScreen"))
+                {
+                    User removeMe = null;
+
+                    for (int i = 0; i < users.size(); i++)
+                    {
+                        if (users.get(i).getId() == Integer.parseInt(removeBookOrUserInput.getText().trim()))
+                        {
+                            removeMe = users.get(i);
+                            break;
+                        }
+                    }
+
+                    Library.deleteUser(removeMe, users, books);
+                }
+            }
+            else
+            {
+                createErrorPopup();
+            }
+        }
+
         frame.repaint();
         frame.validate();
 
         System.out.println(currentScreen);
+        System.out.println(removeBookOrUserInput.getText());
     }
 
     @Override
@@ -623,6 +715,17 @@ public class UIManager implements MouseListener, ChangeListener
         resetDateButton = new JButton();
         returnBookButton = new JButton();
         extendBookButton = new JButton();
+        removeUserScreenButton = new JButton();
+        addBookScreenButton = new JButton();
+        removeBookScreenButton = new JButton();
+        adminButton = new JButton();
+        adminSubmitButton = new JButton();
+        removeBookOrUserInput = new JTextField();
+        bookTitleInput = new JTextField();
+        bookAuthorInput = new JTextField();
+        bookISBNInput = new JTextField();
+        addBookTextPanel = new JPanel();
+        addBookInputPanel = new JPanel();;
 
         frame.setSize(1000, 650);
         frame.setTitle("Tully Library");
@@ -646,6 +749,8 @@ public class UIManager implements MouseListener, ChangeListener
         feePanel.setBackground(frame.getContentPane().getBackground());
         bookInfoButtonPanel.setBackground(frame.getContentPane().getBackground());
         dateModifyPanel.setBackground(frame.getContentPane().getBackground());
+        addBookTextPanel.setBackground(frame.getContentPane().getBackground());
+        addBookInputPanel.setBackground(frame.getContentPane().getBackground());
 
         incrementDatesSpinner = new JSpinner();
         incrementDatesSpinner.setVisible(false);
@@ -757,6 +862,37 @@ public class UIManager implements MouseListener, ChangeListener
         currentFees.setVisible(false);
         currentFees.setHorizontalTextPosition(SwingConstants.LEFT);
 
+        removeBookOrUserText = new JLabel();
+        removeBookOrUserText.setFont(new Font("Arial", Font.BOLD, 40));
+        removeBookOrUserText.setPreferredSize(new Dimension(450, 75));
+        removeBookOrUserText.setOpaque(false);
+        removeBookOrUserText.setVisible(false);
+        removeBookOrUserText.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        addBookTitleText = new JLabel();
+        addBookTitleText.setText("Enter the book's title: ");
+        addBookTitleText.setFont(new Font("Arial", Font.BOLD, 40));
+        addBookTitleText.setPreferredSize(new Dimension(475, 100));
+        addBookTitleText.setOpaque(false);
+        addBookTitleText.setVisible(false);
+        addBookTitleText.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        addBookAuthorText = new JLabel();
+        addBookAuthorText.setText("Enter the book's author: ");
+        addBookAuthorText.setFont(new Font("Arial", Font.BOLD, 40));
+        addBookAuthorText.setPreferredSize(new Dimension(475, 100));
+        addBookAuthorText.setOpaque(false);
+        addBookAuthorText.setVisible(false);
+        addBookAuthorText.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        addBookISBNText = new JLabel();
+        addBookISBNText.setText("Enter the book's ISBN: ");
+        addBookISBNText.setFont(new Font("Arial", Font.BOLD, 40));
+        addBookISBNText.setPreferredSize(new Dimension(475, 100));
+        addBookISBNText.setOpaque(false);
+        addBookISBNText.setVisible(false);
+        addBookISBNText.setHorizontalTextPosition(SwingConstants.LEFT);
+
         signUpButton.setText("Sign Up");
         signUpButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
         signUpButton.setPreferredSize(new Dimension(200, 100));
@@ -786,6 +922,41 @@ public class UIManager implements MouseListener, ChangeListener
         submitButton.setFont(new Font("Arial", Font.BOLD, 40));
         submitButton.setVisible(false);
         submitButton.addMouseListener(this);
+
+        adminButton.setText("Admin");
+        adminButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        adminButton.setPreferredSize(new Dimension(200, 100));
+        adminButton.setFont(new Font("Arial", Font.BOLD, 40));
+        adminButton.setVisible(false);
+        adminButton.addMouseListener(this);
+
+        removeUserScreenButton.setText("Remove User");
+        removeUserScreenButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        removeUserScreenButton.setPreferredSize(new Dimension(300, 100));
+        removeUserScreenButton.setFont(new Font("Arial", Font.BOLD, 40));
+        removeUserScreenButton.setVisible(false);
+        removeUserScreenButton.addMouseListener(this);
+
+        addBookScreenButton.setText("Add Book");
+        addBookScreenButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        addBookScreenButton.setPreferredSize(new Dimension(300, 100));
+        addBookScreenButton.setFont(new Font("Arial", Font.BOLD, 40));
+        addBookScreenButton.setVisible(false);
+        addBookScreenButton.addMouseListener(this);
+
+        removeBookScreenButton.setText("Remove Book");
+        removeBookScreenButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        removeBookScreenButton.setPreferredSize(new Dimension(300, 100));
+        removeBookScreenButton.setFont(new Font("Arial", Font.BOLD, 40));
+        removeBookScreenButton.setVisible(false);
+        removeBookScreenButton.addMouseListener(this);
+
+        adminSubmitButton.setText("Submit");
+        adminSubmitButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+        adminSubmitButton.setPreferredSize(new Dimension(200, 100));
+        adminSubmitButton.setFont(new Font("Arial", Font.BOLD, 40));
+        adminSubmitButton.setVisible(false);
+        adminSubmitButton.addMouseListener(this);
 
         resetDateButton.setText("Reset Date");
         resetDateButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
@@ -906,6 +1077,38 @@ public class UIManager implements MouseListener, ChangeListener
         passwordCheckBox.setBackground(new Color(73, 84, 114));
         passwordCheckBox.addMouseListener(this);
 
+        removeBookOrUserInput.setFont(new Font("Arial", Font.BOLD, 40));
+        removeBookOrUserInput.setPreferredSize(new Dimension(400, 100));
+        removeBookOrUserInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
+        removeBookOrUserInput.setVisible(false);
+        removeBookOrUserInput.addMouseListener(this);
+        removeBookOrUserInput.setForeground(Color.BLACK);
+        removeBookOrUserInput.setEditable(true);
+
+        bookTitleInput.setFont(new Font("Arial", Font.BOLD, 40));
+        bookTitleInput.setPreferredSize(new Dimension(475, 100));
+        bookTitleInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
+        bookTitleInput.setVisible(true);
+        bookTitleInput.addMouseListener(this);
+        bookTitleInput.setForeground(Color.BLACK);
+        bookTitleInput.setEditable(true);
+
+        bookAuthorInput.setFont(new Font("Arial", Font.BOLD, 40));
+        bookAuthorInput.setPreferredSize(new Dimension(475, 100));
+        bookAuthorInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
+        bookAuthorInput.setVisible(true);
+        bookAuthorInput.addMouseListener(this);
+        bookAuthorInput.setForeground(Color.BLACK);
+        bookAuthorInput.setEditable(true);
+
+        bookISBNInput.setFont(new Font("Arial", Font.BOLD, 40));
+        bookISBNInput.setPreferredSize(new Dimension(475, 100));
+        bookISBNInput.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
+        bookISBNInput.setVisible(true);
+        bookISBNInput.addMouseListener(this);
+        bookISBNInput.setForeground(Color.BLACK);
+        bookISBNInput.setEditable(true);
+
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3, false));
         scrollPane.setPreferredSize(new Dimension(500, 435));
         // changes vertical scroll bar scrolling speed
@@ -944,13 +1147,14 @@ public class UIManager implements MouseListener, ChangeListener
         north.add(welcomeText);
         center.add(signUpButton);
         center.add(loginButton);
+        south.add(adminButton);
         south.add(dateModifyButton);
 
         welcomeText.setVisible(true);
         signUpButton.setVisible(true);
         loginButton.setVisible(true);
         dateModifyButton.setVisible(true);
-
+        adminButton.setVisible(true);
         // makes it so the components "flow" like text
         // the flow can be customized to be focused on the left, center, etc
         // FlowLayout is also the default layout
@@ -1086,6 +1290,30 @@ public class UIManager implements MouseListener, ChangeListener
                 case "incorrectLogin":
                     errors.append("Incorrect username or password!");
                     break;
+                case "emptyTitle":
+                    errors.append("Book title cannot be empty!");
+                    break;
+                case "emptyAuthor":
+                    errors.append("Book author cannot be empty!");
+                    break;
+                case "emptyISBN":
+                    errors.append("Book ISBN cannot be empty!");
+                    break;
+                case "emptyID":
+                    errors.append("User ID cannot be empty!");
+                    break;
+                case "duplicateISBN":
+                    errors.append("Book already exists!");
+                    break;
+                case "needsNumbers":
+                    errors.append("The ISBN or ID must only include numbers!");
+                    break;
+                case "bookDoesntExist":
+                    errors.append("The book with the given ISBN does not exist!");
+                    break;
+                case "userDoesntExist":
+                    errors.append("The user with the given ID does not exist!");
+                    break;
             }
 
             if (i != errors.length() - 1)
@@ -1113,18 +1341,18 @@ public class UIManager implements MouseListener, ChangeListener
 
         //one field is empty
         // or both fields are empty
-        if ((checkUsername || usertxt.isEmpty()) && (checkPassword || pass.isEmpty())) {
+        if ((checkUsername || usertxt.isBlank()) && (checkPassword || pass.isBlank())) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             listOfErrors.add("emptyPass");
             return false;
         }
-        else if (checkUsername || usertxt.isEmpty()) {
+        else if (checkUsername || usertxt.isBlank()) {
             System.out.println("bruh");
             listOfErrors.add("emptyUser");
             return false;
         }
-        else if (checkPassword || pass.isEmpty()) {
+        else if (checkPassword || pass.isBlank()) {
             System.out.println("bruh");
             listOfErrors.add("emptyPass");
             return false;
@@ -1218,6 +1446,136 @@ public class UIManager implements MouseListener, ChangeListener
         {
             return false;
         }
+    }
+
+    // Checks the various admin screens for any specific errors
+    // For example, checks empty text field
+    // returns true if no errors
+    // returns false if errors
+    public boolean checkAdminSubmitButton()
+    {
+        listOfErrors = new ArrayList<>();
+
+        if (currentScreen.equals("addBookScreen"))
+        {
+            if (bookTitleInput.getText().isBlank())
+            {
+                listOfErrors.add("emptyTitle");
+            }
+            if (bookAuthorInput.getText().isBlank())
+            {
+                listOfErrors.add("emptyAuthor");
+            }
+            if (bookISBNInput.getText().isBlank())
+            {
+                listOfErrors.add("emptyISBN");
+            }
+        }
+
+        if (currentScreen.equals("removeUserScreen") || currentScreen.equals("removeBookScreen"))
+        {
+            if (removeBookOrUserInput.getText().isBlank() && currentScreen.equals("removeBookScreen"))
+            {
+                listOfErrors.add("emptyISBN");
+            }
+            if (removeBookOrUserInput.getText().isBlank() && currentScreen.equals("removeUserScreen"))
+            {
+                listOfErrors.add("emptyID");
+            }
+        }
+
+        if (currentScreen.equals("removeBookScreen"))
+        {
+            boolean found = false;
+            // find if book exists
+            for (int i = 0; i < books.size(); i++)
+            {
+                if (books.get(i).getISBN().equals(removeBookOrUserInput.getText().trim()))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                listOfErrors.add("bookDoesntExist");
+            }
+        }
+
+        if (currentScreen.equals("addBookScreen"))
+        {
+            // check for duplicate ISBNs
+            for (int i = 0; i < books.size(); i++)
+            {
+                if (books.get(i).getISBN().equals(removeBookOrUserInput.getText().trim()))
+                {
+                    listOfErrors.add("duplicateISBN");
+                    break;
+                }
+            }
+        }
+
+        // checks if input doesn't contain numbers
+        Pattern letterUp = Pattern.compile("[A-Z]");
+        Pattern letterDown = Pattern.compile("[a-z]");
+        Pattern special = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
+
+        Matcher hasLetterUp = null;
+        Matcher hasLetterDown = null;
+        Matcher hasSpecial = null;
+
+        if (currentScreen.equals("addBookScreen"))
+        {
+            hasLetterUp = letterUp.matcher(bookISBNInput.getText());
+            hasLetterDown = letterDown.matcher(bookISBNInput.getText());
+            hasSpecial = special.matcher(bookISBNInput.getText());
+
+            if (hasLetterDown.find() || hasLetterDown.find() || hasSpecial.find())
+            {
+                listOfErrors.add("needsNumbers");
+            }
+        }
+        else if (currentScreen.equals("removeBookScreen") || currentScreen.equals("removeUserScreen"))
+        {
+            hasLetterUp = letterUp.matcher(removeBookOrUserInput.getText());
+            hasLetterDown = letterDown.matcher(removeBookOrUserInput.getText());
+            hasSpecial = special.matcher(removeBookOrUserInput.getText());
+
+            if (hasLetterDown.find() || hasLetterDown.find() || hasSpecial.find())
+            {
+                listOfErrors.add("needsNumbers");
+            }
+            // to bypass error if checking a string with characters rather than numbers when parsing string -> Integer
+            else
+            {
+                if (currentScreen.equals("removeUserScreen") && !removeBookOrUserInput.getText().isBlank())
+                {
+                    boolean found = false;
+                    // find if user exists
+                    for (int i = 0; i < users.size(); i++)
+                    {
+                        if (users.get(i).getId() == Integer.parseInt(removeBookOrUserInput.getText().trim()))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        listOfErrors.add("userDoesntExist");
+                    }
+                }
+            }
+        }
+
+        if (listOfErrors.isEmpty())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     // creates the actual library
@@ -1318,17 +1676,22 @@ public class UIManager implements MouseListener, ChangeListener
 
         currentFees.setVisible(true);
 
+        // ensures that the user's fees are only calculated "once"
+        // and not duplicated on each login
+        double userFees = 0;
+
         for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
         {
             LocalDate current = LocalDate.parse(currentDate);
 
             if (currentUser.getBooksBorrowed().get(i).getReturnDate().isBefore(current))
             {
-                currentUser.setFees(currentUser.getFees() + 5.25);
+                userFees = userFees + 5.25;
             }
         }
 
-        currentFees.setText("Fees: " + String.format("%.2f", currentUser.getFees()) + "$");
+        currentUser.setFees(userFees);
+        currentFees.setText("Fees: " + String.format("%.2f", userFees) + "$");
 
         north.setVisible(true);
         payFeesButton.setVisible(true);
@@ -1621,6 +1984,112 @@ public class UIManager implements MouseListener, ChangeListener
         // if screen was wider, the whole thing would look like a straight line
     }
 
+    public void createAdminScreen()
+    {
+        currentScreen = "adminScreen";
+
+        center.add(addBookScreenButton);
+        center.add(removeBookScreenButton);
+        center.add(removeUserScreenButton);
+        south.add(returnButton);
+
+        removeUserScreenButton.setVisible(true);
+        addBookScreenButton.setVisible(true);
+        removeBookScreenButton.setVisible(true);
+        returnButton.setVisible(true);
+    }
+
+    // Displays the screen where you can add a completely new book given it's title, author, and ISBN
+    public void createAddBookScreen()
+    {
+        // TODO: CHECK ISBN FOR DUPLICATES
+        // textfields with all book attributes
+        currentScreen = "addBookScreen";
+
+        west.add(addBookTextPanel);
+        center.add(addBookInputPanel);
+        addBookTextPanel.add(addBookTitleText);
+        addBookTextPanel.add(addBookAuthorText);
+        addBookTextPanel.add(addBookISBNText);
+        south.add(returnButton);
+        south.add(adminSubmitButton);
+        addBookInputPanel.add(bookTitleInput);
+        addBookInputPanel.add(bookAuthorInput);
+        addBookInputPanel.add(bookISBNInput);
+
+        bookTitleInput.setText("");
+        bookAuthorInput.setText("");
+        bookISBNInput.setText("");
+
+        adminSubmitButton.setVisible(true);
+        returnButton.setVisible(true);
+        addBookTitleText.setVisible(true);
+        addBookAuthorText.setVisible(true);
+        addBookISBNText.setVisible(true);
+        bookTitleInput.setVisible(true);
+        bookAuthorInput.setVisible(true);
+        bookISBNInput.setVisible(true);
+
+        north.setBorder(BorderFactory.createEmptyBorder(0, 300, 0, 0));
+        west.setBorder(BorderFactory.createEmptyBorder(40, 10, 0, 0));
+        center.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
+
+        addBookTextPanel.setLayout(new GridLayout(4, 1));
+        addBookInputPanel.setLayout(new GridLayout(4, 1));
+    }
+
+    // TODO: CHECK IF ANYTHING OTHER THAN #'S ARE INPUT
+    // Displays the screen where you can remove a book given its ISBN
+    public void createRemoveBookScreen()
+    {
+        // textfield with book isbn
+        currentScreen = "removeBookScreen";
+
+        south.add(returnButton);
+        south.add(adminSubmitButton);
+        west.add(removeBookOrUserText);
+        center.add(removeBookOrUserInput);
+
+        removeBookOrUserText.setPreferredSize(new Dimension(450, 75));
+        removeBookOrUserText.setText("Enter the book's ISBN: ");
+
+        removeBookOrUserInput.setText("");
+
+        adminSubmitButton.setVisible(true);
+        returnButton.setVisible(true);
+        removeBookOrUserText.setVisible(true);
+        removeBookOrUserInput.setVisible(true);
+
+        west.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 0));
+        center.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 50));
+    }
+
+    // TODO: CHECK IF ANYTHING OTHER THAN #'S ARE INPUT
+    // Displays the screen where you can remove a user given their ID
+    public void createRemoveUserScreen()
+    {
+        // textfield with userID
+        currentScreen = "removeUserScreen";
+
+        south.add(returnButton);
+        south.add(adminSubmitButton);
+        west.add(removeBookOrUserText);
+        center.add(removeBookOrUserInput);
+
+        removeBookOrUserText.setPreferredSize(new Dimension(400, 75));
+        removeBookOrUserText.setText("Enter the user's ID: ");
+
+        removeBookOrUserInput.setText("");
+
+        adminSubmitButton.setVisible(true);
+        returnButton.setVisible(true);
+        removeBookOrUserText.setVisible(true);
+        removeBookOrUserInput.setVisible(true);
+
+        west.setBorder(BorderFactory.createEmptyBorder(0, 80, 0, 0));
+        center.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 80));
+    }
+
     // hides the current screen right before transitioning to another screen
     // the transition is not part of this
     // but all the "create" methods
@@ -1631,6 +2100,7 @@ public class UIManager implements MouseListener, ChangeListener
             signUpButton.setVisible(false);
             loginButton.setVisible(false);
             dateModifyButton.setVisible(false);
+            adminButton.setVisible(false);
         }
         if (currentScreen.equals("signUp"))
         {
@@ -1717,6 +2187,50 @@ public class UIManager implements MouseListener, ChangeListener
             currentDateText.setVisible(false);
             returnButton.setVisible(false);
             resetDateButton.setVisible(false);
+        }
+        else if (currentScreen.equals("adminScreen"))
+        {
+            removeUserScreenButton.setVisible(false);
+            addBookScreenButton.setVisible(false);
+            removeBookScreenButton.setVisible(false);
+            returnButton.setVisible(false);
+        }
+        else if (currentScreen.equals("addBookScreen"))
+        {
+            adminSubmitButton.setVisible(false);
+
+            west.remove(addBookTextPanel);
+            center.remove(addBookInputPanel);
+
+            north.setBorder(BorderFactory.createEmptyBorder(0, 300, 150, 0));
+            west.setBorder(null);
+            center.setBorder(null);
+        }
+        else if (currentScreen.equals("removeBookScreen"))
+        {
+            removeBookOrUserText.setVisible(false);
+            removeBookOrUserInput.setVisible(false);
+            adminSubmitButton.setVisible(false);
+
+            south.remove(adminSubmitButton);
+            west.remove(removeBookOrUserText);
+            center.remove(removeBookOrUserInput);
+
+            west.setBorder(null);
+            center.setBorder(null);
+        }
+        else if (currentScreen.equals("removeUserScreen"))
+        {
+            removeBookOrUserText.setVisible(false);
+            removeBookOrUserInput.setVisible(false);
+            adminSubmitButton.setVisible(false);
+
+            south.remove(adminSubmitButton);
+            west.remove(removeBookOrUserText);
+            center.remove(removeBookOrUserInput);
+
+            west.setBorder(null);
+            center.setBorder(null);
         }
     }
 
@@ -1897,6 +2411,31 @@ public class UIManager implements MouseListener, ChangeListener
             extendBookButton.setBackground(RED);
         }
 
+        if (e.getSource() == adminButton)
+        {
+            adminButton.setBackground(RED);
+        }
+
+        if (e.getSource() == removeUserScreenButton)
+        {
+            removeUserScreenButton.setBackground(RED);
+        }
+
+        if (e.getSource() == removeBookScreenButton)
+        {
+            removeBookScreenButton.setBackground(RED);
+        }
+
+        if (e.getSource() == addBookScreenButton)
+        {
+            addBookScreenButton.setBackground(RED);
+        }
+
+        if (e.getSource() == adminSubmitButton)
+        {
+            adminSubmitButton.setBackground(RED);
+        }
+
         // show tooltip/hint for password
         if (e.getSource() == passwordCheckBox)
         {
@@ -2000,6 +2539,31 @@ public class UIManager implements MouseListener, ChangeListener
         if (e.getSource() == extendBookButton)
         {
             extendBookButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == adminButton)
+        {
+            adminButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == removeUserScreenButton)
+        {
+            removeUserScreenButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == addBookScreenButton)
+        {
+            addBookScreenButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == removeBookScreenButton)
+        {
+            removeBookScreenButton.setBackground(DEFAULT_COLOR);
+        }
+
+        if (e.getSource() == adminSubmitButton)
+        {
+            adminSubmitButton.setBackground(DEFAULT_COLOR);
         }
 
         if (e.getSource() == passwordCheckBox)
