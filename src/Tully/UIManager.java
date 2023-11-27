@@ -278,6 +278,9 @@ public class UIManager implements MouseListener, ChangeListener
             }
             else if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksBorrowed()))
             {
+                currentBookSelected.setReturnDate(LocalDate.now().plusDays(7));
+                currentBookSelected.setBorrowed(true);
+                Library.updateBookDate(currentBookSelected);
                 currentUser.getBooksBorrowed().add(currentBookSelected);
                 Library.updateUserBooks(currentUser);
 
@@ -325,6 +328,8 @@ public class UIManager implements MouseListener, ChangeListener
         else if (e.getSource() == extendBookButton)
         {
             currentBookSelected.setReturnDate(currentBookSelected.getReturnDate().plusYears(1));
+            currentBookSelected.setBorrowed(true);
+            Library.updateUserBooks(currentUser);
             Library.updateBookDate(currentBookSelected);
 
             JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
@@ -1190,7 +1195,7 @@ public class UIManager implements MouseListener, ChangeListener
         {
             // TODO: Exception/Check if the off-chance two users have the same random ID?
             int userId = Integer.parseInt(randoId);
-            // TODO: refactor later into its own method with parameters for username, password, id
+            // TODO: refactor later into its own method with parameters for username, password, id?
             File f = new File("users.txt");
             if (f.exists() && !f.isDirectory()) {
                 BufferedWriter out = new BufferedWriter(new FileWriter("users.txt", true));
