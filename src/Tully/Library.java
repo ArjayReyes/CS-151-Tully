@@ -48,6 +48,107 @@ public class Library
         }
     }
 
+    // Add book method
+    public static void addBook(String title, String author, String ISBN, ArrayList<Book> books) throws IOException {
+        File f = new File("bookDatabase.txt");
+        if (f.exists() && !f.isDirectory()) {
+            BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt", true));
+            out.write(title + "\n" + author + "\n" + ISBN + "\n");
+            out.newLine();
+            out.close();
+        }
+        else {
+            BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt"));
+            out.write(title + "\n" + author + "\n" + ISBN + "\n");
+            out.newLine();
+            out.close();
+        }
+        Book book = new Book(title, author, ISBN);
+        books.add(book);
+    }
+
+    // Delete book method.
+    public static void deleteBook(Book book, ArrayList<User> users, ArrayList<Book> books) {
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("bookDatabase.txt"));
+            StringBuilder input = new StringBuilder();
+            String line;
+
+            while ((line = file.readLine()) != null) {
+                String trimLine = line.trim();
+                if (trimLine.contains(book.getTitle())) {
+                    file.readLine();
+                    file.readLine();
+                    file.readLine();
+                    for (int i=0; i <users.size(); i++) {
+                        ArrayList<Book> borrowedBooks = users.get(i).getBooksBorrowed();
+                        for (int j = 0; i < borrowedBooks.size(); j++) {
+                            if (borrowedBooks.get(j).equals(book)) {
+                                borrowedBooks.remove(j);
+                            }
+                        }
+                        ArrayList<Book> waitlistedBooks = users.get(i).getBooksWaitlisted();
+                        for (int k = 0; i < waitlistedBooks.size(); k++) {
+                            if (waitlistedBooks.get(k).equals(book)) {
+                                waitlistedBooks.remove(k);
+                            }
+                        }
+                    }
+                    continue;
+                }
+                input.append(line);
+                input.append('\n');
+            }
+            file.close();
+
+            // write the new string with the replaced line OVER the same file
+            FileOutputStream fileOut = new FileOutputStream("bookDatabase.txt");
+            fileOut.write(input.toString().getBytes());
+            fileOut.close();
+            loadBookDatabase(books);
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+
+    // Sets all borrowed books as available and resets to default date, requires user object.
+    public static void deleteUser(User user, ArrayList<User> users, ArrayList<Book> books) {
+        try {
+            BufferedReader file = new BufferedReader(new FileReader("userDatabase.txt"));
+            StringBuilder input = new StringBuilder();
+            String line;
+
+            while ((line = file.readLine()) != null) {
+                String trimLine = line.trim();
+                if (trimLine.contains(user.getName() + "," + user.getPassword() + "," + user.getId())) {
+                    file.readLine();
+                    file.readLine();
+                    ArrayList<Book> removedBooks = new ArrayList<Book>(user.getBooksBorrowed());
+                    for (Book book : removedBooks) {
+                        book.setBorrowed(false);
+                        book.setReturnDate(LocalDate.of(2025,1,1));
+                        updateBookDate(book);
+                    }
+                    loadBookDatabase(books);
+                    continue;
+                }
+                input.append(line);
+                input.append('\n');
+            }
+            file.close();
+
+            // write the new string with the replaced line OVER the same file
+            FileOutputStream fileOut = new FileOutputStream("userDatabase.txt");
+            fileOut.write(input.toString().getBytes());
+            fileOut.close();
+            loadUserDatabase(users);
+
+        } catch (Exception e) {
+            System.out.println("Problem reading file.");
+        }
+    }
+
     // Method updates user books in userDatabase.txt
     // update user directly before calling this method!
     // can be looped for entire database if needed
@@ -158,9 +259,9 @@ public class Library
             String returnDate = sc.nextLine();
             if (!(returnDate.isBlank())) {
                 book.setReturnDate(LocalDate.parse(returnDate));
+                book.setBorrowed(true);
             }
             books.add(book);
-            System.out.println(book);
         }
     }
 
