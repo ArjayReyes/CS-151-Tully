@@ -376,8 +376,6 @@ public class UIManager implements MouseListener, ChangeListener
         {
             if (checkAdminSubmitButton())
             {
-                hideCurrentScreen();
-
                 if (currentScreen.equals("addBookScreen"))
                 {
                     try
@@ -419,6 +417,8 @@ public class UIManager implements MouseListener, ChangeListener
 
                     Library.deleteUser(removeMe, users, books);
                 }
+
+                JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
             {
