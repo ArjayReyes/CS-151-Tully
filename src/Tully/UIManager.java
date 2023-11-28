@@ -5,8 +5,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.*;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -104,8 +102,8 @@ public class UIManager implements MouseListener, ChangeListener
     private Book currentBookSelected;
     private JButton currentBookButtonPressed;
 
- private static UIManager uniqueInstance;
-    
+    private static UIManager uniqueInstance;
+
     public static void main(String[] args){
         UIManager test = new UIManager();
         test.initialize();
@@ -116,13 +114,13 @@ public class UIManager implements MouseListener, ChangeListener
         books = new ArrayList<Book>();
     }
     public static UIManager getInstance(){
-		if (uniqueInstance == null) {
-			synchronized (UIManager.class) {
-				if (uniqueInstance == null) uniqueInstance = new UIManager();
-			}
-		}
-		return uniqueInstance;
-	}
+        if (uniqueInstance == null) {
+            synchronized (UIManager.class) {
+                if (uniqueInstance == null) uniqueInstance = new UIManager();
+            }
+        }
+        return uniqueInstance;
+    }
 
     public String getCurrentScreen()
     {
@@ -139,7 +137,7 @@ public class UIManager implements MouseListener, ChangeListener
         return currentUser;
     }
 
-    
+
     public void mousePressed(MouseEvent e)
     {
         checkUserFieldsClickable(e);
@@ -203,19 +201,15 @@ public class UIManager implements MouseListener, ChangeListener
         {
             if (currentScreen.equals("signUp"))
             {
-                try {
-                    if (checkSignUpFields())
-                    {
-                        hideCurrentScreen();
+                if (checkSignUpFields())
+                {
+                    hideCurrentScreen();
 
-                        createSignUpSuccess();
-                    }
-                    else
-                    {
-                        createErrorPopup();
-                    }
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
+                    createSignUpSuccess();
+                }
+                else
+                {
+                    createErrorPopup();
                 }
             }
             else if (currentScreen.equals("login"))
@@ -314,7 +308,8 @@ public class UIManager implements MouseListener, ChangeListener
                 if (currentBookSelected.getIsWaitlisted())
                 {
                     currentUser.getBooksWaitlisted().remove(currentBookSelected);
-
+                    System.out.println("hit");
+                    Library.updateUserBooks(currentUser);
                     waitListPanel.remove(currentBookButtonPressed);
                 }
 
@@ -330,6 +325,7 @@ public class UIManager implements MouseListener, ChangeListener
             if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksWaitlisted()))
             {
                 currentUser.getBooksWaitlisted().add(currentBookSelected);
+                Library.updateUserBooks(currentUser);
                 JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
@@ -342,6 +338,9 @@ public class UIManager implements MouseListener, ChangeListener
             inventoryPanel.remove(currentBookButtonPressed);
 
             currentUser.getBooksBorrowed().remove(currentBookSelected);
+            currentBookSelected.setReturnDate(LocalDate.of(2025,1,1));
+            Library.updateUserBooks(currentUser);
+            Library.updateBookDate(currentBookSelected);
 
             JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " returned");
         }
@@ -380,9 +379,9 @@ public class UIManager implements MouseListener, ChangeListener
             {
                 if (currentScreen.equals("addBookScreen"))
                 {
-                    
-                        Library.addBook(bookTitleInput.getText(), bookAuthorInput.getText(), bookISBNInput.getText(), books);
-                    
+
+                    Library.addBook(bookTitleInput.getText(), bookAuthorInput.getText(), bookISBNInput.getText(), books);
+
                 }
                 else if (currentScreen.equals("removeBookScreen"))
                 {
@@ -430,7 +429,7 @@ public class UIManager implements MouseListener, ChangeListener
         System.out.println(removeBookOrUserInput.getText());
     }
 
-    
+
     public void mouseEntered(MouseEvent e)
     {
         checkMouseHover(e);
@@ -439,7 +438,7 @@ public class UIManager implements MouseListener, ChangeListener
         frame.repaint();
     }
 
-    
+
     public void mouseExited(MouseEvent e)
     {
         checkMouseStoppedHovering(e);
@@ -448,10 +447,10 @@ public class UIManager implements MouseListener, ChangeListener
         frame.repaint();
     }
 
-    
+
     public void mouseReleased(MouseEvent e) {}
 
-    
+
     public void mouseClicked(MouseEvent e) {}
 
     // checks if the user has any overdue books
@@ -671,12 +670,12 @@ public class UIManager implements MouseListener, ChangeListener
     // and setting their intial attributes
     public void initialize()
     {
-    	// File I/O method for Users
-		Library.loadUserDatabase(users);
-		Library.loadBookDatabase(books);
-	
+        // File I/O method for Users
+        Library.loadUserDatabase(users);
+        Library.loadBookDatabase(books);
+
         Library.checkWaitlists(books, users);
-        
+
         frame = new JFrame();
         north = new JPanel();
         center = new JPanel();
@@ -1333,7 +1332,7 @@ public class UIManager implements MouseListener, ChangeListener
     }
 
     // checks the username & password of the signup for any errors
-    public boolean checkSignUpFields() throws IOException {
+    public boolean checkSignUpFields() {
         //Here we can make sure that username and password exist, and that the password fits the requirements.
         String usertxt = usernameSignUp.getText();
         String pass = String.valueOf(passwordSignUp.getPassword()); //.getText() is depreciated
@@ -1426,22 +1425,7 @@ public class UIManager implements MouseListener, ChangeListener
         {
             // TODO: Exception/Check if the off-chance two users have the same random ID?
             int userId = Integer.parseInt(randoId);
-            // TODO: refactor later into its own method with parameters for username, password, id?
-            File f = new File("users.txt");
-            if (f.exists() && !f.isDirectory()) {
-                BufferedWriter out = new BufferedWriter(new FileWriter("users.txt", true));
-                out.write(usertxt + "," + pass + "," + userId);
-                out.newLine();
-                out.close();
-            }
-            else {
-                BufferedWriter out = new BufferedWriter(new FileWriter("users.txt"));
-                out.write(usertxt + "," + pass + "," + userId);
-                out.newLine();
-                out.close();
-            }
-            User u = new User(usertxt, pass, userId, new ArrayList<Book>(), new ArrayList<Book>(), 0);
-            users.add(u);
+            Library.addUser(usertxt, pass, userId, users);
 
             return true;
         }
@@ -2576,10 +2560,10 @@ public class UIManager implements MouseListener, ChangeListener
         }
     }
     public LocalDate getDate() {
-    	return LocalDate.parse(currentDate);
+        return LocalDate.parse(currentDate);
     }
     public LocalDate getToday() {
-    	return LocalDate.parse(TODAY);
+        return LocalDate.parse(TODAY);
     }
     public void stateChanged(ChangeEvent e)
     {
