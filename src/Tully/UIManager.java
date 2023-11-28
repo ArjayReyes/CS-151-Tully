@@ -2575,8 +2575,12 @@ public class UIManager implements MouseListener, ChangeListener
             ToolTipManager.sharedInstance().setDismissDelay(DEFAULT_TIMEOUT_TIME);
         }
     }
-
-    
+    public LocalDate getDate() {
+    	return LocalDate.parse(currentDate);
+    }
+    public LocalDate getToday() {
+    	return LocalDate.parse(TODAY);
+    }
     public void stateChanged(ChangeEvent e)
     {
         if (e.getSource() == incrementDatesSpinner)
