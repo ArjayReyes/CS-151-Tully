@@ -1421,12 +1421,7 @@ public class UIManager implements MouseListener, ChangeListener
             listOfErrors.add("number");
         }
         //if all is good, create the User, add it to users
-        String randoId = "";
-        Random r = new Random();
-        for(int i = 0; i< 8;i++) {
-            randoId += r.nextInt(10);
-        }
-
+        
         // empty = no errors found
         if (listOfErrors.isEmpty())
         {
