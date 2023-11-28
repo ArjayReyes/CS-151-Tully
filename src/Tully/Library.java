@@ -121,6 +121,8 @@ public class Library
                 BufferedWriter out = new BufferedWriter(new FileWriter("userDatabase.txt", true));
                 out.write(usertxt + "," + pass + "," + userId);
                 out.newLine();
+                out.newLine();
+                out.newLine();
                 out.close();
             }
             else {
@@ -267,6 +269,27 @@ public class Library
         }
     }
 
+    public static int newUserId() {
+        int newId = -1;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("latestID.txt"));
+            String line = reader.readLine();
+            int oldId = Integer.parseInt(line);
+            reader.close();
+            oldId++;
+
+            // Write back the oldId to file
+            BufferedWriter writer = new BufferedWriter(new FileWriter("latestID.txt"));
+            writer.write(String.valueOf(oldId));
+            writer.close();
+
+            newId = oldId;
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return newId;
+    }
+
     // Method reads book info from bookDatabase.txt to an ArrayList<Tully.Book>
     // Reads: title, author, ISBN, returnDate
     // Waitlist is updated through checkWaitlist
@@ -274,6 +297,7 @@ public class Library
         try {
             File bookFile = new File("bookDatabase.txt");
             Scanner sc = new Scanner(bookFile);
+
             while (sc.hasNext()) {
                 Book book = new Book();
                 String title = sc.nextLine();
