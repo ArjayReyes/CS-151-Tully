@@ -114,6 +114,29 @@ public class Library
         }
     }
 
+    public static void addUser(String usertxt, String pass, int userId, ArrayList<User> users) {
+        try {
+            File f = new File("users.txt");
+            if (f.exists() && !f.isDirectory()) {
+                BufferedWriter out = new BufferedWriter(new FileWriter("userDatabase.txt", true));
+                out.write(usertxt + "," + pass + "," + userId);
+                out.newLine();
+                out.close();
+            }
+            else {
+                BufferedWriter out = new BufferedWriter(new FileWriter("userDatabase.txt"));
+                out.write(usertxt + "," + pass + "," + userId);
+                out.newLine();
+                out.close();
+            }
+            User u = new User(usertxt, pass, userId, new ArrayList<Book>(), new ArrayList<Book>(), 0);
+            users.add(u);
+        }
+        catch (Exception e) {
+            System.out.println("Error writing to file.");
+        }
+    }
+
     // Sets all borrowed books as available and resets to default date, requires user object.
     public static void deleteUser(User user, ArrayList<User> users, ArrayList<Book> books) {
         try {
