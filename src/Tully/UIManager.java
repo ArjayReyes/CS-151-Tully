@@ -97,6 +97,7 @@ public class UIManager implements MouseListener, ChangeListener
     private ArrayList<Book> books;
     private User currentUser;
     private ArrayList<String> listOfErrors;
+    private static int userId;
     // to keep track of the current book selected
     // so that there is no need for more loops/checking what book has been selected
     private Book currentBookSelected;
@@ -1429,8 +1430,7 @@ public class UIManager implements MouseListener, ChangeListener
         // empty = no errors found
         if (listOfErrors.isEmpty())
         {
-            // TODO: Exception/Check if the off-chance two users have the same random ID?
-            int userId = Integer.parseInt(randoId);
+            userId = Library.newUserId();
             Library.addUser(usertxt, pass, userId, users);
 
             return true;
@@ -1660,7 +1660,7 @@ public class UIManager implements MouseListener, ChangeListener
 
         north.setPreferredSize(new Dimension(1000, 300));
 
-        welcomeUserText.setText("Welcome, " + currentUser.getName()+ "!");
+        welcomeUserText.setText("Welcome, " + currentUser.getName()+ "! (ID: " + currentUser.getId() + ")");
         welcomeUserText.setFont(new Font("Arial", Font.BOLD, 40));
         welcomeUserText.setPreferredSize(new Dimension(950, 75));
         welcomeUserText.setOpaque(false);
