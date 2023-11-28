@@ -104,23 +104,25 @@ public class UIManager implements MouseListener, ChangeListener
     private Book currentBookSelected;
     private JButton currentBookButtonPressed;
 
-    public static void main(String[] args) throws FileNotFoundException, ParseException {
-        UIManager test = new UIManager();
+    private static UIManager uniqueInstance;
+    
+    public static void main(String[] args){
+        UIManager test = UIManager.getInstance();
+        test.initialize();
     }
 
-    public UIManager() throws FileNotFoundException, ParseException {
+    private UIManager() {
         users = new ArrayList<User>();
         books = new ArrayList<Book>();
-
-        // File I/O method for Users
-        Library.loadUserDatabase(users);
-        Library.loadBookDatabase(books);
-        Library.checkWaitlists(books, users);
-
-        // probably have to create Library instance here maybe
-
-        initialize();
     }
+    public static UIManager getInstance(){
+		if (uniqueInstance == null) {
+			synchronized (UIManager.class) {
+				if (uniqueInstance == null) uniqueInstance = new UIManager();
+			}
+		}
+		return uniqueInstance;
+	}
 
     public String getCurrentScreen()
     {
@@ -137,7 +139,7 @@ public class UIManager implements MouseListener, ChangeListener
         return currentUser;
     }
 
-    @Override
+    
     public void mousePressed(MouseEvent e)
     {
         checkUserFieldsClickable(e);
@@ -433,7 +435,7 @@ public class UIManager implements MouseListener, ChangeListener
         System.out.println(removeBookOrUserInput.getText());
     }
 
-    @Override
+    
     public void mouseEntered(MouseEvent e)
     {
         checkMouseHover(e);
@@ -442,7 +444,7 @@ public class UIManager implements MouseListener, ChangeListener
         frame.repaint();
     }
 
-    @Override
+    
     public void mouseExited(MouseEvent e)
     {
         checkMouseStoppedHovering(e);
@@ -451,10 +453,10 @@ public class UIManager implements MouseListener, ChangeListener
         frame.repaint();
     }
 
-    @Override
+    
     public void mouseReleased(MouseEvent e) {}
 
-    @Override
+    
     public void mouseClicked(MouseEvent e) {}
 
     // checks if the user has any overdue books
@@ -674,6 +676,17 @@ public class UIManager implements MouseListener, ChangeListener
     // and setting their intial attributes
     public void initialize()
     {
+    	// File I/O method for Users
+        try {
+			Library.loadUserDatabase(users);
+			Library.loadBookDatabase(books);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+        Library.checkWaitlists(books, users);
+
+        // probably have to create Library instance here maybe
+
         frame = new JFrame();
         north = new JPanel();
         center = new JPanel();
@@ -2573,7 +2586,7 @@ public class UIManager implements MouseListener, ChangeListener
         }
     }
 
-    @Override
+    
     public void stateChanged(ChangeEvent e)
     {
         if (e.getSource() == incrementDatesSpinner)
