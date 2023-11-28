@@ -169,6 +169,11 @@ Assumptions/Operating Environment/Intended Usage:
     * We opted for this rudimentary method due to time constraints and to meet project requirements.
 
 ## Diagrams
+[Class Diagram](https://github.com/ArjayReyes/CS-151-Tully/blob/e362095d23865772a32fa4cb01d7b782a59aaf04/diagrams/updatedClassDiagram.PNG)
+
+[State Diagram](https://github.com/ArjayReyes/CS-151-Tully/blob/de13f3f0b1aea7fe0c0e84bd7a50f48e9c0fd51f/diagrams/stateDiagram.png)
+
+[Sequence Diagram](https://github.com/ArjayReyes/CS-151-Tully/blob/669660edf699e102c16bd14dfc1a1aebce3457ad/diagrams/updatedSequenceDiagram.PNG)
 
 ## Functionality
 
