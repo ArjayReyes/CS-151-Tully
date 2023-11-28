@@ -304,15 +304,11 @@ public class UIManager implements MouseListener, ChangeListener
                 currentUser.getBooksBorrowed().add(currentBookSelected);
                 Library.updateUserBooks(currentUser);
 
-                System.out.println(currentBookSelected.getIsWaitlisted());
-                System.out.println("working");
-
                 // able to borrow book means its available
                 // so no need for it to be waitlisted
                 if (currentBookSelected.getIsWaitlisted())
                 {
                     currentUser.getBooksWaitlisted().remove(currentBookSelected);
-                    System.out.println("hit");
                     Library.updateUserBooks(currentUser);
                     waitListPanel.remove(currentBookButtonPressed);
                 }
@@ -624,9 +620,6 @@ public class UIManager implements MouseListener, ChangeListener
         String temp = getJButtonTextWithoutHTML(button);
 
         int ISBNIndex = temp.indexOf("ISBN: ");
-
-        //System.out.println(temp.substring(ISBNIndex + "ISBN: ".length()));
-        //System.out.println("current: " + currentBookSelected.getISBN());
 
         // add "ISBN: ".length() to get end index of the "ISBN: " string
         // so that only the ISBN is returned
@@ -1246,7 +1239,7 @@ public class UIManager implements MouseListener, ChangeListener
 
         // html text
         // &emsp = 4 empty spaces
-        signUpSuccessText.setText("<html>" + "&emsp&emsp&emsp&emsp&emsp&emsp&emsp Successfully signed up!" + "</html>");
+        signUpSuccessText.setText("<html>" + "&emsp&emsp&emsp&emsp&emsp&emsp&emsp Successfully signed up!<br>&emsp&emsp&emsp&emsp&emsp&emsp&emsp Your ID is: " + userId + "</html>");
         signUpSuccessText.setPreferredSize(new Dimension(1000, 400));
 
         center.add(signUpSuccessText);
@@ -1519,6 +1512,7 @@ public class UIManager implements MouseListener, ChangeListener
             hasLetterDown = letterDown.matcher(bookISBNInput.getText());
             hasSpecial = special.matcher(bookISBNInput.getText());
 
+            // checking if has other characters than numbers
             if (hasLetterDown.find() || hasLetterDown.find() || hasSpecial.find())
             {
                 listOfErrors.add("needsNumbers");
@@ -1655,9 +1649,9 @@ public class UIManager implements MouseListener, ChangeListener
 
         north.setPreferredSize(new Dimension(1000, 300));
 
-        welcomeUserText.setText("Welcome, " + currentUser.getName()+ "! (ID: " + currentUser.getId() + ")");
+        welcomeUserText.setText("<html>Welcome, " + currentUser.getName()+ "!<br>" + "Your ID is: " + currentUser.getId() + "</html>");
         welcomeUserText.setFont(new Font("Arial", Font.BOLD, 40));
-        welcomeUserText.setPreferredSize(new Dimension(950, 75));
+        welcomeUserText.setPreferredSize(new Dimension(950, 100));
         welcomeUserText.setOpaque(false);
         welcomeUserText.setVisible(true);
         welcomeUserText.setHorizontalTextPosition(SwingConstants.LEFT);
