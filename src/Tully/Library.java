@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class Library
 {
     private ArrayList<Book> books; // maybe change these to Collection class? ALSO HAVE TO WAIT FILE IO PARSING THING
-    private final UIManager UI = new UIManager(); // creates UI
+    private final UIManager UI = UIManager.getInstance(); // creates UI
     // Users temporarily have to be stored in the UIManager class, but should not be WHEN USERS ARE STORED TO A TXT FILE
     private User currentUser;
     private ArrayList<User> users;
