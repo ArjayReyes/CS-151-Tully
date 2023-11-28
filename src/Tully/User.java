@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 //RAAAAAAAAAAAAAAAAAAh
 public class User {
@@ -6,6 +7,8 @@ public class User {
 	private int libraryID;
 	private ArrayList<Book> booksBorrowed;//change to be generalized as books
 	private ArrayList<Book> booksWaitlisted;
+	private UIManager UI = UIManager.getInstance();
+
 	private double fees;
 
 	public User() {
@@ -25,7 +28,6 @@ public class User {
 		this.booksWaitlisted = ar2;
 		this.fees = fees;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -76,24 +78,24 @@ public class User {
 	}
 
 	// Added an equals method within Tully.Book class.
-	public boolean hasBook(String book) {//add a method in book to compare the contents
-		if (booksBorrowed.contains(book)) {
-			//System.out.println("yea");
-			return true;
+	public boolean hasBook(Book book) {//add a method in book to compare the contents
+		for(Book b : booksBorrowed) {
+			if (b.equals(book)) return true;
 		}
-		//System.out.println("nop");
 		return false;
 	}
-
+	//returns how many days are past the return date
+	private int daysDifference(LocalDate d) {
+		return (d.getYear()-UI.getDate().getYear())*365 + (d.getDayOfYear()-UI.getDate().getDayOfYear());
+	}
 	//make it so it checks the date from Tully.Library and compares to the return Date of Tully.Book.
-	public boolean isOverdue(String book) {
-		//first statement checks if you even have the book
-//		if (hasBook(book)) {
-//			System.out.println("You don't even have this book silly");
-//			return false;
-//		}
-		if (booksBorrowed.contains(book)) {
-			//System.out.println("yea");
+	public boolean isOverdue(Book book) {
+		if (hasBook(book)) {
+			System.out.println("You don't even have this book silly");
+			return false;
+		}
+		if (daysDifference(book.getReturnDate()) > 0) {
+			System.out.println("looks overdue");
 			return true;
 		}
 		//System.out.println("nop");
