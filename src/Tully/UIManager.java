@@ -291,7 +291,7 @@ public class UIManager implements MouseListener, ChangeListener
 
         if (e.getSource() == borrowBookButton)
         {
-            if (currentBookSelected.getIsWaitlisted())
+            if (currentBookSelected.getIsBorrowed())
             {
                 JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " is currently in use!");
             }
@@ -302,6 +302,9 @@ public class UIManager implements MouseListener, ChangeListener
                 Library.updateBookDate(currentBookSelected);
                 currentUser.getBooksBorrowed().add(currentBookSelected);
                 Library.updateUserBooks(currentUser);
+
+                System.out.println(currentBookSelected.getIsWaitlisted());
+                System.out.println("working");
 
                 // able to borrow book means its available
                 // so no need for it to be waitlisted
@@ -326,6 +329,7 @@ public class UIManager implements MouseListener, ChangeListener
             {
                 currentUser.getBooksWaitlisted().add(currentBookSelected);
                 Library.updateUserBooks(currentUser);
+                currentBookSelected.setIsWaitlisted(true);
                 JOptionPane.showMessageDialog(frame, "Success!");
             }
             else
@@ -574,7 +578,7 @@ public class UIManager implements MouseListener, ChangeListener
                 bookNameText.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
                 bookAvailabilityText.setVisible(true);
-                if (tempBook.getIsWaitlisted() || tempBook.getIsBorrowed())
+                if (tempBook.getIsBorrowed())
                 {
                     bookAvailabilityText.setText("Availability: In Use");
                 }
@@ -607,6 +611,8 @@ public class UIManager implements MouseListener, ChangeListener
 
                 currentBookSelected = tempBook;
                 currentBookButtonPressed = temp;
+
+                System.out.println(currentBookButtonPressed.getText());
             }
         }
     }
