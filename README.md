@@ -102,7 +102,7 @@ Darrel - UI/Frontend
             1. If information does not pass a specific check, a popup tells the user what they need
         2. Leads to a success screen 
     9. Signup Success Screen
-        1. Displays “Successfully signed up!” text
+        1. Displays “Successfully signed up!” text & user's ID
         2. Allows user to go back to the main screen
     10. Login Screen
         1. Submit button now checks the given username/password and opens the library screen if all necessary checks are passed
@@ -113,7 +113,7 @@ Darrel - UI/Frontend
             2. Popup screen displays the book’s title, author, ISBN, and availability (if it’s in use or not)
                 1. Buttons to allow the user to borrow or waitlist the book or close the popup
     12. Account Screen
-        1. Welcome text displaying the user’s username
+        1. Welcome text displaying the user’s username & their ID
         2. Book fee text displaying the user’s fee for overdue books
         3. Pay fee button that sets the user’s fee back to 0 as long as they returned the books they owe/are overdue
     13. Inventory Screen
