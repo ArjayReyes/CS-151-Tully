@@ -304,6 +304,60 @@ After working on difficult hurdles, our startup 5X-if-else delivered a suitable 
 
 ### Screenshots
 
+#### Main Screen
+![](https://github.com/ArjayReyes/CS-151-Tully/blob/94e0b7dc82e8b829969c1e5af310df8215b41ed3/screenshots/Main%20Screen.PNG)
+#### Sign Up Screen: Password Requirements
+![](screenshots/Signup-1.PNG)
+#### Sign Up Screen: PasswordField
+![](screenshots/Signup-2.PNG)
+#### Sign Up Screen: PasswordField Disabled
+![](screenshots/Signup-3.PNG)
+#### Sign Up Screen: Successful Sign-Up, ID Displayed
+![](screenshots/Signup-4.PNG)
+#### Login Screen
+![](screenshots/Login-1.PNG)
+#### Login Screen
+![](screenshots/Login-2.PNG)
+#### Login Screen: Exception Displaied
+![](screenshots/Login-3.PNG)
+#### Library Screen: List of Books
+![](screenshots/Library-1.PNG)
+#### Library Screen: Book Information
+![](screenshots/Library-2.PNG)
+#### Library Screen: Book Successfully Borrowed
+![](screenshots/Library-3.PNG)
+#### Account Screen
+![](screenshots/Account-1.PNG)
+#### Account Screen: Overdue Fees
+![](screenshots/Account-2.PNG)
+#### Account Screen: Overdue Book Returned
+![](screenshots/Account-3.PNG)
+#### Account Screen: No more fees!
+![](screenshots/Account-4.PNG)
+#### Account Screen: Waitlisted Books
+![](screenshots/WaitlistedBooks.PNG)
+#### Account Screen: Borrowed Books
+![](screenshots/BorrowedBooks.PNG)
+#### Date Screen: Default
+![](screenshots/Date-1.PNG)
+#### Date Screen: Modified
+![](screenshots/Date-2.PNG)
+#### Admin Screen
+![](screenshots/Admin.PNG)
+#### Add Book
+![](screenshots/AddBook-1.PNG)
+#### Add Book Success
+![](screenshots/AddBook-2.PNG)
+#### Remove Book
+![](screenshots/RemoveBook-1.PNG)
+#### RemoveBook Success
+![](screenshots/RemoveBook-2.PNG)
+#### Remove User
+![](screenshots/RemoveUser-1.PNG)
+#### Remove User Success
+![](screenshots/RemoveUser-2.PNG)
+
+
 ## References
 
 [https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file](https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file)
