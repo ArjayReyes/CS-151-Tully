@@ -1,7 +1,6 @@
 package Tully;
 
 import java.io.*;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -13,11 +12,11 @@ public class Library
     // Users temporarily have to be stored in the UIManager class, but should not be WHEN USERS ARE STORED TO A TXT FILE
     private User currentUser;
     private ArrayList<User> users;
-    public Library() throws FileNotFoundException, ParseException {
+    public Library() {
         books = new ArrayList<Book>();
     }
 
-    public Library(ArrayList<Book> books, ArrayList<User> users) throws FileNotFoundException, ParseException {
+    public Library(ArrayList<Book> books, ArrayList<User> users) {
         this.books = books;
     }
 
@@ -49,22 +48,25 @@ public class Library
     }
 
     // Add book method
-    public static void addBook(String title, String author, String ISBN, ArrayList<Book> books) throws IOException {
-        File f = new File("bookDatabase.txt");
-        if (f.exists() && !f.isDirectory()) {
-            BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt", true));
-            out.write(title + "\n" + author + "\n" + ISBN + "\n");
-            out.newLine();
-            out.close();
+    public static void addBook(String title, String author, String ISBN, ArrayList<Book> books) {
+        try {
+            File f = new File("bookDatabase.txt");
+            if (f.exists() && !f.isDirectory()) {
+                BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt", true));
+                out.write(title + "\n" + author + "\n" + ISBN + "\n");
+                out.newLine();
+                out.close();
+            } else {
+                BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt"));
+                out.write(title + "\n" + author + "\n" + ISBN + "\n");
+                out.newLine();
+                out.close();
+            }
+            Book book = new Book(title, author, ISBN);
+            books.add(book);
+        } catch (Exception ex) {
+            System.out.println("Problem reading file.");
         }
-        else {
-            BufferedWriter out = new BufferedWriter(new FileWriter("bookDatabase.txt"));
-            out.write(title + "\n" + author + "\n" + ISBN + "\n");
-            out.newLine();
-            out.close();
-        }
-        Book book = new Book(title, author, ISBN);
-        books.add(book);
     }
 
     // Delete book method.
@@ -245,74 +247,82 @@ public class Library
     // Method reads book info from bookDatabase.txt to an ArrayList<Tully.Book>
     // Reads: title, author, ISBN, returnDate
     // Waitlist is updated through checkWaitlist
-    public static void loadBookDatabase(ArrayList<Book> books) throws FileNotFoundException {
-        File bookFile = new File("bookDatabase.txt");
-        Scanner sc = new Scanner(bookFile);
-        while (sc.hasNext()) {
-            Book book = new Book();
-            String title = sc.nextLine();
-            book.setTitle(title);
-            String author = sc.nextLine();
-            book.setAuthor(author);
-            String ISBN = sc.nextLine();
-            book.setISBN(ISBN);
-            String returnDate = sc.nextLine();
-            if (!(returnDate.isBlank())) {
-                book.setReturnDate(LocalDate.parse(returnDate));
-                book.setBorrowed(true);
+    public static void loadBookDatabase(ArrayList<Book> books) {
+        try {
+            File bookFile = new File("bookDatabase.txt");
+            Scanner sc = new Scanner(bookFile);
+            while (sc.hasNext()) {
+                Book book = new Book();
+                String title = sc.nextLine();
+                book.setTitle(title);
+                String author = sc.nextLine();
+                book.setAuthor(author);
+                String ISBN = sc.nextLine();
+                book.setISBN(ISBN);
+                String returnDate = sc.nextLine();
+                if (!(returnDate.isBlank())) {
+                    book.setReturnDate(LocalDate.parse(returnDate));
+                    book.setBorrowed(true);
+                }
+                books.add(book);
             }
-            books.add(book);
+        } catch (Exception e) {
+            System.out.println("No file found!");
         }
     }
 
     // This method adds user info from userDatabase.txt to an ArrayList<User>
     // Reads: username, password, info, ArrayList<Books> for borrowed and waitlisted books
-    public static void loadUserDatabase(ArrayList<User> users) throws FileNotFoundException {
-        File userFile = new File("userDatabase.txt");
-        Scanner sc = new Scanner(userFile);
+    public static void loadUserDatabase(ArrayList<User> users) {
+        try {
+            File userFile = new File("userDatabase.txt");
+            Scanner sc = new Scanner(userFile);
 
-        while (sc.hasNext()) {
-            User user = new User();
-            String credentials = sc.nextLine();
-            String[] userInfo = credentials.split(",");
-            user.setName(userInfo[0]);
-            user.setPassword(userInfo[1]);
-            user.setLibraryID(Integer.parseInt(userInfo[2]));
+            while (sc.hasNext()) {
+                User user = new User();
+                String credentials = sc.nextLine();
+                String[] userInfo = credentials.split(",");
+                user.setName(userInfo[0]);
+                user.setPassword(userInfo[1]);
+                user.setLibraryID(Integer.parseInt(userInfo[2]));
 
-            // next line for borrowedBooks
-            String borrowedList = sc.nextLine();
-            ArrayList<Book> booksBorrowed = new ArrayList<Book>();
-            user.setBooksWaitlisted(booksBorrowed);
-            if (!(borrowedList.isBlank())) {
-                String[] borrowedBooksInfo = borrowedList.split(";");
-                String[] bookInfo;
-                for (String borrowedBooks : borrowedBooksInfo) {
-                    // This splits book information and add to user's borrowed books.
-                    bookInfo = borrowedBooks.split(",");
-                    // utilizes returnDate constructor
-                    Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], LocalDate.parse(bookInfo[3]));
-                    booksBorrowed.add(book);
+                // next line for borrowedBooks
+                String borrowedList = sc.nextLine();
+                ArrayList<Book> booksBorrowed = new ArrayList<Book>();
+                user.setBooksWaitlisted(booksBorrowed);
+                if (!(borrowedList.isBlank())) {
+                    String[] borrowedBooksInfo = borrowedList.split(";");
+                    String[] bookInfo;
+                    for (String borrowedBooks : borrowedBooksInfo) {
+                        // This splits book information and add to user's borrowed books.
+                        bookInfo = borrowedBooks.split(",");
+                        // utilizes returnDate constructor
+                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2], LocalDate.parse(bookInfo[3]));
+                        booksBorrowed.add(book);
+                    }
+                    user.setBooksBorrowed(booksBorrowed);
                 }
-                user.setBooksBorrowed(booksBorrowed);
-            }
-            user.setBooksWaitlisted(booksBorrowed);
+                user.setBooksWaitlisted(booksBorrowed);
 
-            String waitlistList = sc.nextLine();
-            ArrayList<Book> booksWaitlisted = new ArrayList<Book>();
-            user.setBooksWaitlisted(booksWaitlisted);
-            if (!(waitlistList.isBlank())) {
-                String[] waitlistedBooksInfo = waitlistList.split(";");
-                String[] bookInfo;
-                for (String waitlistedBooks : waitlistedBooksInfo) {
-                    bookInfo = waitlistedBooks.split(",");
-                    // utilizes non-returnDate constructor and is set as waitlisted
-                    Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2]);
-                    book.setIsWaitlisted(true);
-                    booksWaitlisted.add(book);
-                }
+                String waitlistList = sc.nextLine();
+                ArrayList<Book> booksWaitlisted = new ArrayList<Book>();
                 user.setBooksWaitlisted(booksWaitlisted);
+                if (!(waitlistList.isBlank())) {
+                    String[] waitlistedBooksInfo = waitlistList.split(";");
+                    String[] bookInfo;
+                    for (String waitlistedBooks : waitlistedBooksInfo) {
+                        bookInfo = waitlistedBooks.split(",");
+                        // utilizes non-returnDate constructor and is set as waitlisted
+                        Book book = new Book(bookInfo[0], bookInfo[1], bookInfo[2]);
+                        book.setIsWaitlisted(true);
+                        booksWaitlisted.add(book);
+                    }
+                    user.setBooksWaitlisted(booksWaitlisted);
+                }
+                users.add(user);
             }
-            users.add(user);
+        } catch (Exception e) {
+            System.out.println("No file found!");
         }
     }
 
