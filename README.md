@@ -70,9 +70,13 @@ Arjay
 
 Matthew
 1. Created the User class
-    - The User class
+    - The User class has the account information along with the list of borrowed and waitlisted books
+    - It has the basic getters, setters, and toStrings along with functions that deal with overdue books and fee calculations based on currentDate and returnDate of the book
 2. Created and implemented the custom exceptions
-    -
+    - There is one abstract class "GeneralException" and 2 subclasses "PasswordLoginException" and "FeeException"
+    - The password exceptions deal with creating and logging into an account
+    - the fee exceptions deal with certain prohibited actions when the user has an active fee
+3. Made the Sign up and Login buttons work initially
 ### Project Code & Report
 
 Darrel - UI/Frontend
@@ -156,7 +160,34 @@ Arjay - File I/O/Backend
     3. Updated Sequence and Class diagrams to showcase updated classes/parameters used.
 
 Matthew
-
+1. The User class
+   - Created and implemented most of the user class
+   - Key functions to include that weren't the getters, setters, and toString printers:
+   - isOverdue/hasOverdue
+       - These functions check for overdue book(s), where one is specific and one is generalized for all of the user's books
+       - It will first check if you even have the book with hasBook, and if not, returns false.
+       - It then calls daysDifference to get how many days currentDate is past the book's returnDate. If it's negative, it's not overdue and visa versa.
+   - hasBook
+       - This function will verify if a given book is in the user's booksBorrowed via enhanced for loop.
+       - The .equals calculation is done by Arjay in the Book class.
+   - calculateFees/feeCostOfBook
+       - These functions will get calculate the fees that the user may have, and is called every time the user page pops up.
+       - calculateFees is a for loop that adds up the individual fees from each book with feeCostOfBooks and returns it
+       - The function also utilizes daysDifference to not only check if a book is overdue, but also determine how big the fee is.
+       - The calculation per book is .50 * # days overdue, capping at a fee of 10.
+       - The reason why these two functions are separate is because I realized the pay fee button is pretty useless when returning a book clears the fee, so I made it display the fee price of returning a book with the JOptionPane.
+   - daysDifference
+       - This function is utilized for fee calculations and overdue checking.
+       - Since I can't find a function that can convert a date into all days, i improvised and made it get the difference of the years * 365 + the differnce in their days of the week.
+       - Ex tested calculations that work: cur = 2023/11/28, return 2023/11/24, days missed is 2023-2023 + 4 = 4 days
+       - cur = 2024/1/1, return = 2023/12/31 is 2024-2023*365 + (-364) = 1 day
+2. The 3 Exception classes
+   -
+3. Small modification with the UIManager's design
+   - Converted the UIManager's design pattern into a singleton type. where only one instance of UIManager should exist.
+   - This is important because the universal information of the currentDate is needed to be consistent for the User class and checking for overdues.
+   - Changed it so borrowing a book is based on currentDate(one we can control for testing purposes) and not TODAY(constant date) so you don't borrow a book and immediately have to pay a fee for it.
+   - Made extending a book not add a year worth of time and instead another week.
 ## Problem
 
 Tully Library has contracted our startup company, 5X-if-else, to create an intuitive library management system by the end of Q4 2023. The library management system must incorporate object-oriented programming concepts, Java’s Graphical User Interface (GUI) capabilities, and exception handling.
