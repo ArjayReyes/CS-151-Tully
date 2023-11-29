@@ -408,7 +408,4 @@ After working on difficult hurdles, our startup 5X-if-else delivered a suitable 
 
 
 ## References
-
-[https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file](https://stackoverflow.com/questions/20039980/java-replace-line-in-text-file)
-
-[https://stackoverflow.com/questions/8180430/how-to-override-equals-method-in-java](https://stackoverflow.com/questions/8180430/how-to-override-equals-method-in-java)
+* No references used or needed.
