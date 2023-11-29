@@ -114,7 +114,7 @@ public class Library
 
     public static void addUser(String usertxt, String pass, int userId, ArrayList<User> users) {
         try {
-            File f = new File("users.txt");
+            File f = new File("userDatabase.txt");
             if (f.exists() && !f.isDirectory()) {
                 BufferedWriter out = new BufferedWriter(new FileWriter("userDatabase.txt", true));
                 out.write(usertxt + "," + pass + "," + userId);
