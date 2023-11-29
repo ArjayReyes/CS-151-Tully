@@ -106,7 +106,7 @@ public class UIManager implements MouseListener, ChangeListener
     private static UIManager uniqueInstance;
 
     public static void main(String[] args){
-        UIManager test = new UIManager();
+        UIManager test = UIManager.getInstance();
         test.initialize();
     }
 
@@ -237,15 +237,12 @@ public class UIManager implements MouseListener, ChangeListener
 
         if (e.getSource() == payFeesButton)
         {
-            // if has any overdue books
-            if (checkOverdueBooks())
-            {
-                JOptionPane.showMessageDialog(frame, "You need to return any overdue books before you can pay your fees!");
-            }
-            else
-            {
-                currentUser.setFees(currentUser.getFees());
+            try {
+            	if (currentUser.hasOverdue()) throw new FeeException("a");
+                currentUser.calculateFees();
                 currentFees.setText("Fees: " + String.format("%.2f", currentUser.getFees()) + "$");
+            }catch(FeeException ee) {
+            	ee.displayMessage(frame, "You need to return any overdue books before you can pay your fees!");
             }
         }
 
@@ -292,13 +289,17 @@ public class UIManager implements MouseListener, ChangeListener
 
         if (e.getSource() == borrowBookButton)
         {
-            if (currentBookSelected.getIsBorrowed())
+        	try {
+        	if (currentUser.hasOverdue()) {
+        		throw new FeeException("a");
+        	}
+        	else if (currentBookSelected.getIsBorrowed())
             {
                 JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " is currently in use!");
             }
             else if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksBorrowed()))
             {
-                currentBookSelected.setReturnDate(LocalDate.now().plusDays(7));
+                currentBookSelected.setReturnDate(LocalDate.parse(currentDate).plusDays(7));
                 currentBookSelected.setBorrowed(true);
                 Library.updateBookDate(currentBookSelected);
                 currentUser.getBooksBorrowed().add(currentBookSelected);
@@ -319,9 +320,16 @@ public class UIManager implements MouseListener, ChangeListener
             {
                 JOptionPane.showMessageDialog(frame, "You have already borrowed " + currentBookSelected.getTitle());
             }
+        	}catch(FeeException ee) {
+        		ee.displayMessage(frame, "Can't borrow book with an active fee.");
+        	}
         }
         else if (e.getSource() == waitListBookButton)
         {
+        	try {
+            	if (currentUser.hasOverdue()) {
+            		throw new FeeException("a");
+            	}
             if (!checkDuplicateBook(currentBookSelected, currentUser.getBooksWaitlisted()))
             {
                 currentUser.getBooksWaitlisted().add(currentBookSelected);
@@ -333,26 +341,38 @@ public class UIManager implements MouseListener, ChangeListener
             {
                 JOptionPane.showMessageDialog(frame, "You have already waitlisted " + currentBookSelected.getTitle());
             }
+        }catch(FeeException ee) {
+    		ee.displayMessage(frame, "Can't waitlist book with an active fee.");
+    	}
         }
         else if (e.getSource() == returnBookButton)
         {
             inventoryPanel.remove(currentBookButtonPressed);
 
+            double thyFee = currentUser.feeCostOfBook(currentBookSelected);
+            String extra = "";
+            if (thyFee > 0) extra = "(with a fee of "+thyFee+"$)";
             currentUser.getBooksBorrowed().remove(currentBookSelected);
             currentBookSelected.setReturnDate(LocalDate.of(2025,1,1));
             Library.updateUserBooks(currentUser);
             Library.updateBookDate(currentBookSelected);
-
-            JOptionPane.showMessageDialog(frame, currentBookSelected.getTitle() + " returned");
+            
+            JOptionPane.showMessageDialog(frame, "Book "+ currentBookSelected.getTitle() + " returned"+extra);
         }
         else if (e.getSource() == extendBookButton)
         {
-            currentBookSelected.setReturnDate(currentBookSelected.getReturnDate().plusYears(1));
-            currentBookSelected.setBorrowed(true);
-            Library.updateUserBooks(currentUser);
-            Library.updateBookDate(currentBookSelected);
+        	try {
+            	if (currentUser.hasOverdue()) throw new FeeException("a");
+            	currentBookSelected.setReturnDate(currentBookSelected.getReturnDate().plusDays(7));
+                currentBookSelected.setBorrowed(true);
+                Library.updateUserBooks(currentUser);
+                Library.updateBookDate(currentBookSelected);
 
-            JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
+                JOptionPane.showMessageDialog(frame, "Due date extended to: " + currentBookSelected.getReturnDate());
+        	}catch(FeeException ee) {
+        		ee.displayMessage(frame, "Can't extend book with an active fee.");
+        	}
+            
         }
 
         if (e.getSource() == addBookScreenButton)
@@ -454,22 +474,7 @@ public class UIManager implements MouseListener, ChangeListener
 
     public void mouseClicked(MouseEvent e) {}
 
-    // checks if the user has any overdue books
-    public boolean checkOverdueBooks()
-    {
-        for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
-        {
-            LocalDate current = LocalDate.parse(currentDate);
-
-            if (currentUser.getBooksBorrowed().get(i).getReturnDate().isBefore(current))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+   
     // checks if there is a duplicate book in checkMe
     // assuming that all ISBN's are unique
     public boolean checkDuplicateBook(Book book, ArrayList<Book> checkMe)
@@ -1328,7 +1333,11 @@ public class UIManager implements MouseListener, ChangeListener
         errors.append("</html>");
 
         // display the error
-        JOptionPane.showMessageDialog(frame, errors.toString());
+        try {
+        	throw new PasswordLoginException("a");
+        }catch(PasswordLoginException e) {
+        	e.displayMessage(frame, errors.toString());
+        }
     }
 
     // checks the username & password of the signup for any errors
@@ -1660,20 +1669,8 @@ public class UIManager implements MouseListener, ChangeListener
 
         // ensures that the user's fees are only calculated "once"
         // and not duplicated on each login
-        double userFees = 0;
-
-        for (int i = 0; i < currentUser.getBooksBorrowed().size(); i++)
-        {
-            LocalDate current = LocalDate.parse(currentDate);
-
-            if (currentUser.getBooksBorrowed().get(i).getReturnDate().isBefore(current))
-            {
-                userFees = userFees + 5.25;
-            }
-        }
-
-        currentUser.setFees(userFees);
-        currentFees.setText("Fees: " + String.format("%.2f", userFees) + "$");
+        currentUser.calculateFees();
+        currentFees.setText("Fees: " + String.format("%.2f", currentUser.getFees()) + "$");
 
         north.setVisible(true);
         payFeesButton.setVisible(true);
@@ -2560,12 +2557,16 @@ public class UIManager implements MouseListener, ChangeListener
     public LocalDate getToday() {
         return LocalDate.parse(TODAY);
     }
+    public void setDate(LocalDate d) {
+    	currentDate = d.toString();
+    }
     public void stateChanged(ChangeEvent e)
     {
         if (e.getSource() == incrementDatesSpinner)
         {
             currentDate = LocalDate.parse(TODAY).plusDays((Integer) incrementDatesSpinner.getValue()).toString();
             currentDateText.setText("Current Date: " + currentDate);
+            System.out.println("currentDate change: "+currentDate);
         }
     }
 }
