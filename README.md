@@ -153,7 +153,7 @@ Arjay - File I/O/Backend
         1. Booleans for Book class that check if it is borrowed or waitlisted.
         2. Using LocalDate instead of the deprecated Date library for Book.
 3. Project Diagram Update
-    3. Updated Sequence and Class diagrams to showcase updated classes/parameters used.
+    1. Updated Sequence and Class diagrams to showcase updated classes/parameters used.
 
 Matthew
 
