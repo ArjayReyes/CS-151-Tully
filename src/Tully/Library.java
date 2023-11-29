@@ -1,5 +1,3 @@
-package Tully;
-
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -122,12 +120,6 @@ public class Library
                 out.write(usertxt + "," + pass + "," + userId);
                 out.newLine();
                 out.newLine();
-                out.newLine();
-                out.close();
-            }
-            else {
-                BufferedWriter out = new BufferedWriter(new FileWriter("userDatabase.txt"));
-                out.write(usertxt + "," + pass + "," + userId);
                 out.newLine();
                 out.close();
             }
