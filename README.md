@@ -183,7 +183,7 @@ Matthew
    - PasswordLoginException is the exception that happens whenever there's a reason to deny account creation or login. This can occur in multiple ways, so to list a few it would be no username, not enough password characters, no capital, and just having the wrong login information.
    - FeeException deals with actions that are prohibited when a user has active fees. These actions would include borrowing, waitlisting, and extending books. All it does to check is use the hasOverdue function.
 3. Small modification with the UIManager's design
-   - Converted the UIManager's design pattern into a singleton type. where only one instance of UIManager should exist.
+   - Converted the UIManager's design pattern into a singleton type, where only one instance of UIManager should exist.
    - This is important because the universal information of the currentDate is needed to be consistent for the User class and checking for overdues.
    - Changed it so that borrowing a book is based on currentDate(one we can control for testing purposes) and not TODAY(constant date) so you don't borrow a book and immediately have to pay a fee for it.
    - Made extending a book not add a year worth of time and instead another week.
