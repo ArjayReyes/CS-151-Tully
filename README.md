@@ -340,6 +340,12 @@ After working on difficult hurdles, our startup 5X-if-else delivered a suitable 
 ![](screenshots/Account-1.PNG)
 #### Account Screen: Overdue Fees
 ![](screenshots/Account-2.PNG)
+#### Fee Exception: Cannot Borrow Books with Overdue Fees
+![](screenshots/FeeException-1.png)
+#### Fee Exception: Cannot Waitlist Books with Overdue Fees
+![](screenshots/FeeException-2.png)
+#### Fee Exception: Cannot Extend Books with Overdue Fees
+![](screenshots/FeeException-3.png)
 #### Account Screen: Overdue Book Returned
 ![](screenshots/Account-3.PNG)
 #### Account Screen: No more fees!
