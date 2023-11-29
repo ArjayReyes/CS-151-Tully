@@ -72,11 +72,7 @@ Matthew
 1. Created the User class
     - The User class has the account information along with the list of borrowed and waitlisted books
     - It has the basic getters, setters, and toStrings along with functions that deal with overdue books and fee calculations based on currentDate and returnDate of the book
-2. Created and implemented the custom exceptions
-    - There is one abstract class "GeneralException" and 2 subclasses "PasswordLoginException" and "FeeException"
-    - The password exceptions deal with creating and logging into an account
-    - the fee exceptions deal with certain prohibited actions when the user has an active fee
-3. Made the Sign up and Login buttons work initially
+3. Made the Sign up and Login buttons work initially, using if statements and prints as the basic exceptions
 ### Project Code & Report
 
 Darrel - UI/Frontend
