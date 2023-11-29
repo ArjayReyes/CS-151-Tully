@@ -346,6 +346,8 @@ After working on difficult hurdles, our startup 5X-if-else delivered a suitable 
 ![](screenshots/FeeException-2.png)
 #### Fee Exception: Cannot Extend Books with Overdue Fees
 ![](screenshots/FeeException-3.png)
+#### Fee Exception: Returning Book with Fee
+![](screenshots/FeeException-4.png)
 #### Account Screen: Overdue Book Returned
 ![](screenshots/Account-3.PNG)
 #### Account Screen: No more fees!
