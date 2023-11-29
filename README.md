@@ -19,7 +19,7 @@ Arjay
 3. Wrote initial proposal problem, assumptions, and operations.
 
 Matthew
-
+1. Dealt with the use case diagram(and that's it)
 ### Presentation
 Darrel 
 1. Created barebones UI
@@ -69,7 +69,10 @@ Arjay
     2. Contained information such as title, author, ISBN, and returnDate at the time.
 
 Matthew
-
+1. Created the User class
+    - The User class
+2. Created and implemented the custom exceptions
+    -
 ### Project Code & Report
 
 Darrel - UI/Frontend
