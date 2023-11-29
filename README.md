@@ -166,7 +166,7 @@ Matthew
    - isOverdue/hasOverdue
        - These functions check for overdue book(s), where one is specific and one is generalized for all of the user's books
        - It will first check if you even have the book with hasBook, and if not, returns false.
-       - It then calls daysDifference to get how many days currentDate is past the book's returnDate. If it's negative, it's not overdue and visa versa.
+       - It then calls daysDifference to get how many days currentDate is past the book's returnDate. If it's negative, it's not overdue and vice versa.
    - hasBook
        - This function will verify if a given book is in the user's booksBorrowed via enhanced for loop.
        - The .equals calculation is done by Arjay in the Book class.
@@ -178,15 +178,18 @@ Matthew
        - The reason why these two functions are separate is because I realized the pay fee button is pretty useless when returning a book clears the fee, so I made it display the fee price of returning a book with the JOptionPane.
    - daysDifference
        - This function is utilized for fee calculations and overdue checking.
-       - Since I can't find a function that can convert a date into all days, i improvised and made it get the difference of the years * 365 + the differnce in their days of the week.
-       - Ex tested calculations that work: cur = 2023/11/28, return 2023/11/24, days missed is 2023-2023 + 4 = 4 days
-       - cur = 2024/1/1, return = 2023/12/31 is 2024-2023*365 + (-364) = 1 day
+       - Since I can't find a function that can convert a date into all days, i improvised and made it get the difference of the years * 365 + the difference in their days of the week.
+       - Ex tested calculations that work: cur = 2023/11/28, return 2023/11/24, days missed is 2023-2023 + 4 = 4 days.
+       - cur = 2024/1/1, return = 2023/12/31 is 2024-2023*365 + (-364) = 1 day.
 2. The 3 Exception classes
-   -
+   - There are three exception classes: "GeneralException", "PasswordLoginException", and "FeeException".
+   - GeneralException is an abstract class that has one abstract method, which is to displayMessage. This is to be overwritten with a JOptionPane to show the error message upon catching an exception.
+   - PasswordLoginException is the exception that happens whenever there's a reason to deny account creation or login. This can occur in multiple ways, so to list a few it would be no username, not enough password characters, no capital, and just having the wrong login information.
+   - FeeException deals with actions that are prohibited when a user has active fees. These actions would include borrowing, waitlisting, and extending books. All it does to check is use the hasOverdue function.
 3. Small modification with the UIManager's design
    - Converted the UIManager's design pattern into a singleton type. where only one instance of UIManager should exist.
    - This is important because the universal information of the currentDate is needed to be consistent for the User class and checking for overdues.
-   - Changed it so borrowing a book is based on currentDate(one we can control for testing purposes) and not TODAY(constant date) so you don't borrow a book and immediately have to pay a fee for it.
+   - Changed it so that borrowing a book is based on currentDate(one we can control for testing purposes) and not TODAY(constant date) so you don't borrow a book and immediately have to pay a fee for it.
    - Made extending a book not add a year worth of time and instead another week.
 ## Problem
 
