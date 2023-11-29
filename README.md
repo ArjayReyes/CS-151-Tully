@@ -41,11 +41,11 @@ Darrel
     10. Signup Screen
         1. Allow users to enter username and password in text fields
         2. Checkbox to display password
-        3. Submit button that doesn’t do anything except go to a blank screen
+        3. Submit button
         4. Hovering over the password text field or the checkbox tells the user what they need to do/put for those components
     11. Login Screen
         1. Allow users to enter their username and password
-        2. Submit button that doesn’t do anything except go to Library screen
+        2. Submit button
     12. Library Screen
         1. A scroll box with temporary buttons with dummy information that don’t do anything
         2. Account button to access the user’s account
