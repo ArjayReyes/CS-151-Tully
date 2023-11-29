@@ -48,7 +48,6 @@ public class User {
 	public void setLibraryID(int libraryID) {
 		this.libraryID = libraryID;
 	}
-
 	public int getId() {
 		return libraryID;
 	}
@@ -68,7 +67,30 @@ public class User {
 	public void setBooksWaitlisted(ArrayList<Book> booksWaitlisted) {
 		this.booksWaitlisted = booksWaitlisted;
 	}
-
+	//this returns the fee cost of a book
+	public double feeCostOfBook(Book b) {
+		double feeRate = .5;
+		double feeCap = 10;
+		double tempFees = 0;
+		int daysLate = daysDifference(b.getReturnDate());
+    	System.out.println("late "+ daysLate);
+        if (daysLate > 0) {
+        	tempFees = daysLate*feeRate; if(tempFees>feeCap)tempFees = feeCap;
+        }
+        return tempFees;
+	}
+	public void calculateFees() {
+		double userFees = 0;
+        for (int i = 0; i < booksBorrowed.size(); i++) {
+        	//thy math
+        	double tempFees = feeCostOfBook(booksBorrowed.get(i));
+            userFees += tempFees;
+            System.out.println("fees temp "+tempFees);
+            System.out.println(UI.getDate());
+        }
+        setFees(userFees);
+	}
+	// a little different
 	public double getFees() {
 		return fees;
 	}
@@ -86,11 +108,11 @@ public class User {
 	}
 	//returns how many days are past the return date
 	private int daysDifference(LocalDate d) {
-		return (d.getYear()-UI.getDate().getYear())*365 + (d.getDayOfYear()-UI.getDate().getDayOfYear());
+		return (UI.getDate().getYear()-d.getYear())*365 + (UI.getDate().getDayOfYear()-d.getDayOfYear());
 	}
 	//make it so it checks the date from Tully.Library and compares to the return Date of Tully.Book.
 	public boolean isOverdue(Book book) {
-		if (hasBook(book)) {
+		if (!hasBook(book)) {
 			System.out.println("You don't even have this book silly");
 			return false;
 		}
@@ -101,6 +123,13 @@ public class User {
 		//System.out.println("nop");
 		return false;
 
+	}
+	//a method that stops people from extending or borrowing any more books
+	public boolean hasOverdue() {
+		for (Book b : booksBorrowed) {
+			if (isOverdue(b))return true;
+		}
+		return false;
 	}
 
 	public String showBooksBorrowed() {
