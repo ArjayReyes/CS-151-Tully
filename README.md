@@ -175,6 +175,8 @@ Assumptions/Operating Environment/Intended Usage:
 
 [Sequence Diagram](https://github.com/ArjayReyes/CS-151-Tully/blob/669660edf699e102c16bd14dfc1a1aebce3457ad/diagrams/updatedSequenceDiagram.PNG)
 
+[Use Case Diagram](https://github.com/ArjayReyes/CS-151-Tully/blob/3a59ab931e5298c9be705fcf000b86f617b55675/diagrams/the%20case%20of%20use.png)
+
 ## Functionality
 
 In order to meet with the requirements listed by Tully Library, our program must implement the JavaFX/Java Swing class in order to create an interactive and simple interface for users to access the database. The database itself must also be run using object oriented concepts such as, File I/O, polymorphism, and exception handling. Emphasis on exception handling; used to deal with invalid user inputs, program errors, and stackoverflow. Extensive testing will be necessary to ensure all operations are functioning and exceptions are all handled.
